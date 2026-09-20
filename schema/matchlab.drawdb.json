@@ -1,0 +1,55 @@
+{
+  "tables": [
+    {
+      "id": "FM_U9vagwoFRxUjHyTuiN",
+      "name": "user",
+      "x": 0,
+      "y": 0,
+      "locked": false,
+      "fields": [
+        {
+          "name": "uuid",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "unsigned": true,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "id": "_skkepyKABTZ0bkr_DyV_",
+          "size": "",
+          "values": []
+        },
+        {
+          "id": "M1XmGfhaqjF1qm_sggpqO",
+          "name": "password_hash",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": 60,
+          "values": []
+        }
+      ],
+      "comment": "",
+      "indices": [],
+      "uniqueConstraints": [],
+      "color": "#175e7a",
+      "collapsed": false
+    }
+  ],
+  "relationships": [],
+  "notes": [],
+  "subjectAreas": [],
+  "views": [],
+  "database": "postgresql",
+  "types": [],
+  "enums": [],
+  "title": "Untitled Diagram"
+}
