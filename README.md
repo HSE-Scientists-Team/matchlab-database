@@ -22,7 +22,7 @@ erDiagram
 Схема проектируется визуально в drawDB или редактируется напрямую в DBML.
 
 Алгоритм внесения изменений:
-1) загружаем `schema/matchlab.drawdb.json` в (DrawDB)[https://www.drawdb.app/editor]
+1) загружаем `schema/matchlab.drawdb.json` в [DrawDB](https://www.drawdb.app/editor)
 2) вносим необходимые изменения
 3) экспортируем DBML и JSON в директорию `schema` и заменяем прежнюю версию
 4) экспортируем Mermaid схему и кладем в этот readme
