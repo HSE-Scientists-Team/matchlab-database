@@ -1,29 +1,51 @@
 {
   "tables": [
     {
-      "id": "FM_U9vagwoFRxUjHyTuiN",
-      "name": "user",
-      "x": 0,
-      "y": 0,
-      "locked": false,
+      "id": "JK015UVF7E_7VAeWNl9lN",
+      "name": "user_account",
+      "comment": "",
+      "color": "#175e7a",
       "fields": [
         {
-          "name": "uuid",
+          "id": "nMKnqFbqUfzEfmrtKzahk",
+          "name": "id",
           "type": "UUID",
-          "default": "",
+          "default": "gen_random_uuid()",
           "check": "",
           "primary": true,
           "unique": false,
-          "unsigned": true,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "p4lOMx_E_zworBKzowEaR",
+          "name": "email",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": true,
           "notNull": true,
           "increment": false,
           "comment": "",
-          "id": "_skkepyKABTZ0bkr_DyV_",
-          "size": "",
-          "values": []
+          "size": "320"
         },
         {
-          "id": "M1XmGfhaqjF1qm_sggpqO",
+          "id": "T77NtkGmJIkw5r_SSNebi",
+          "name": "email_domain",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "255"
+        },
+        {
+          "id": "FCNI7_XbEFd8UebeAbZ7P",
           "name": "password_hash",
           "type": "VARCHAR",
           "default": "",
@@ -33,23 +55,2137 @@
           "notNull": true,
           "increment": false,
           "comment": "",
-          "size": 60,
-          "values": []
+          "size": "255"
+        },
+        {
+          "id": "jBrsb1TIYUA2uJ46AUyiB",
+          "name": "role",
+          "type": "SYSTEM_ROLE_CODE",
+          "default": "client",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "NlnS5hz-BW6eAvjbkVmXH",
+          "name": "status",
+          "type": "USER_ACCOUNT_STATUS",
+          "default": "pending_email_verification",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "2Dcbt1mCYaVVBAN99bpUi",
+          "name": "email_verified_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "in0uT4-pNIDFOUHSpqSkv",
+          "name": "email_verification_token_hash",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": true,
+          "notNull": false,
+          "increment": false,
+          "comment": "",
+          "size": "64"
+        },
+        {
+          "id": "Kaf-s2fDq10tOcq9gPJvP",
+          "name": "email_verification_expires_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "5vnaZl2KHxBU-TJczZBme",
+          "name": "status_changed_by_user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "l7AcXF89cgM66uescJubw",
+          "name": "status_changed_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "zspf6-jRHEsToC1_Nau2Q",
+          "name": "status_comment",
+          "type": "TEXT",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "w67Fok2AP2rw3DLDMbl9Y",
+          "name": "last_login_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "qExBIiiyaBTa06Xeteva2",
+          "name": "created_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "qbTN7o9zJpaeJRBjwO8Sr",
+          "name": "updated_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
         }
       ],
+      "indices": [
+        {
+          "id": 0,
+          "name": "idx_user_account_email_domain",
+          "fields": [
+            "email_domain"
+          ],
+          "unique": false
+        },
+        {
+          "id": 1,
+          "name": "idx_user_account_status",
+          "fields": [
+            "status"
+          ],
+          "unique": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 2450.2142997685373,
+      "y": 693.1919262105125
+    },
+    {
+      "id": "5kA9vGwhKhRwo3rhjyBfM",
+      "name": "trusted_email_domain",
       "comment": "",
+      "color": "#175e7a",
+      "fields": [
+        {
+          "id": "ERlQjQDWHQklci-R7xptF",
+          "name": "id",
+          "type": "UUID",
+          "default": "gen_random_uuid()",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "g7aOslNlmMXnhrUcio1Nt",
+          "name": "domain",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": true,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "255"
+        },
+        {
+          "id": "wryPZPAKfGLh7WZeWWmbL",
+          "name": "organization_name",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "255"
+        },
+        {
+          "id": "5rGLJCJ_y_sTTYU9Eyws5",
+          "name": "is_active",
+          "type": "BOOLEAN",
+          "default": "true",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "8wvFIhdxOPt2ov99W1vlH",
+          "name": "created_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "uo6B7c2sgf_-VtKLXdq4X",
+          "name": "updated_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        }
+      ],
       "indices": [],
       "uniqueConstraints": [],
-      "color": "#175e7a",
-      "collapsed": false
+      "locked": false,
+      "collapsed": false,
+      "x": 899.5875541883922,
+      "y": 1371.1115203697655
+    },
+    {
+      "id": "gFOnH0g6Zx_x6GqSTXWHF",
+      "name": "user_profile",
+      "comment": "",
+      "color": "#317256",
+      "fields": [
+        {
+          "id": "cNjrL9TFd9Blt60E6MQKK",
+          "name": "user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "TPKwh1Odm1Woj3L0Dnctq",
+          "name": "schema_version",
+          "type": "INTEGER",
+          "default": "1",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "XdQEQSxmztSPJrZKjw7sR",
+          "name": "data",
+          "type": "JSONB",
+          "default": "{}",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "jBihaBvVVwVzJtOjV-V8E",
+          "name": "created_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "7W3xccpf6X0VhBtB9CTUU",
+          "name": "updated_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        }
+      ],
+      "indices": [],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 2908.0696418125112,
+      "y": 820.802019983995
+    },
+    {
+      "id": "FnheUIAdZOPQlRr9ztKmI",
+      "name": "project",
+      "comment": "",
+      "color": "#317256",
+      "fields": [
+        {
+          "id": "_IpU3XAx9tA1tS0-DTZCa",
+          "name": "id",
+          "type": "UUID",
+          "default": "gen_random_uuid()",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "txwCArwvsaiIhK2JQSwZW",
+          "name": "owner_user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "-CvRekkO9fgk7g0xZk5ZE",
+          "name": "title",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "255"
+        },
+        {
+          "id": "3_OaYRkStNtKHC0GMac6Z",
+          "name": "summary",
+          "type": "TEXT",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "fdqW2Uk1a62G-AOTbKnYK",
+          "name": "data",
+          "type": "JSONB",
+          "default": "{}",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "JtYKjomtPX6xpQmoJboS6",
+          "name": "status",
+          "type": "PROJECT_STATUS",
+          "default": "draft",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "d5ed9cCieg-q_V-16Ib8q",
+          "name": "planned_start_date",
+          "type": "DATE",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "sRW_FQJ-LEJAw0anZUTED",
+          "name": "planned_end_date",
+          "type": "DATE",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "lSsDtCKjT18K94NHTsZ05",
+          "name": "started_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "8CovmuUWhuQ6_ZGuQsRKw",
+          "name": "completed_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "seM9ZyFKo0-_Mswem5Cm8",
+          "name": "published_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "xeXxSW3cCUzo5cz2hSQlM",
+          "name": "moderated_by_user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "leA4B7L78Lw8IxKLmihSn",
+          "name": "moderated_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "VtoWepVLSxGTsEhqChtb8",
+          "name": "moderation_comment",
+          "type": "TEXT",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "yPNkPrrRneOgTqLx9cK4V",
+          "name": "created_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "j6k_eFRtT9XhmwmtiGprZ",
+          "name": "updated_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        }
+      ],
+      "indices": [
+        {
+          "id": 0,
+          "name": "idx_project_owner",
+          "fields": [
+            "owner_user_id"
+          ],
+          "unique": false
+        },
+        {
+          "id": 1,
+          "name": "idx_project_status",
+          "fields": [
+            "status"
+          ],
+          "unique": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 1677.5828439656498,
+      "y": 836.6907486548267
+    },
+    {
+      "id": "vjvA6XkqlhmUmHgG9gXMO",
+      "name": "project_position",
+      "comment": "",
+      "color": "#317256",
+      "fields": [
+        {
+          "id": "-R6WiRZ5FWwZI5iqqup-5",
+          "name": "id",
+          "type": "UUID",
+          "default": "gen_random_uuid()",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "Zr5lN3aqaadIQOOCHtPsh",
+          "name": "project_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "ku-x8aK4qNJXc2KH1jhaN",
+          "name": "title",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "255"
+        },
+        {
+          "id": "nvDsVaEWPof3VxhfziShZ",
+          "name": "description",
+          "type": "TEXT",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "45S5qO1pGk8IR8AoGwycb",
+          "name": "slots_count",
+          "type": "INTEGER",
+          "default": "1",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "PaeZ6mdqvUWelCAKMe5Mm",
+          "name": "is_open",
+          "type": "BOOLEAN",
+          "default": "true",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "FNIW3-TrDFEHUnxHYj5X9",
+          "name": "data",
+          "type": "JSONB",
+          "default": "{}",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "qxwBjMlxmYtjYLxZmYDRe",
+          "name": "created_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "gb3hfKf227yEZXuD16_UF",
+          "name": "updated_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        }
+      ],
+      "indices": [
+        {
+          "id": 0,
+          "name": "idx_project_position_project",
+          "fields": [
+            "project_id"
+          ],
+          "unique": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 327.6682920832693,
+      "y": 888.8104289008586
+    },
+    {
+      "id": "ljNgCe3m-d49Taghcf6a-",
+      "name": "project_member",
+      "comment": "",
+      "color": "#b07a32",
+      "fields": [
+        {
+          "id": "kccXmUnCFSXsg49BBRcYr",
+          "name": "id",
+          "type": "UUID",
+          "default": "gen_random_uuid()",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "4KO03Hgy7wUp3J61gEwLZ",
+          "name": "project_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "BfOujSc1vKiCC0DP50hK5",
+          "name": "user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "czchqirVmwbWi8Psj-jpI",
+          "name": "project_position_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "UdLL-fLowOFfVpHxcOyFk",
+          "name": "status",
+          "type": "PROJECT_MEMBER_STATUS",
+          "default": "active",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "nPUnqOiuL0jJ8lDfmeWcG",
+          "name": "joined_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "j1niUIQfC4lvwmgPObInx",
+          "name": "left_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        }
+      ],
+      "indices": [
+        {
+          "id": 0,
+          "name": "uq_project_member_project_user",
+          "fields": [
+            "project_id",
+            "user_id"
+          ],
+          "unique": true
+        },
+        {
+          "id": 1,
+          "name": "idx_project_member_user",
+          "fields": [
+            "user_id"
+          ],
+          "unique": false
+        },
+        {
+          "id": 2,
+          "name": "idx_project_member_position",
+          "fields": [
+            "project_position_id"
+          ],
+          "unique": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 632.2499584932334,
+      "y": 88.1883935434557
+    },
+    {
+      "id": "AW97uJLQzT46gVsLtzpc0",
+      "name": "project_join_request",
+      "comment": "",
+      "color": "#b07a32",
+      "fields": [
+        {
+          "id": "1sRqtu95JzDdp8IFg3CmK",
+          "name": "id",
+          "type": "UUID",
+          "default": "gen_random_uuid()",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "ksQ9YB_KSsxW4-8eZKXml",
+          "name": "project_position_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "4e2V0K0KADhTfRin8AvHx",
+          "name": "candidate_user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "spxN21C9j7K2Y-dFIIuQk",
+          "name": "type",
+          "type": "JOIN_REQUEST_TYPE",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "GlCilK5N-bGZUP4F6akOI",
+          "name": "status",
+          "type": "JOIN_REQUEST_STATUS",
+          "default": "pending",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "kq1G21wnHO4og9bZ3jLAP",
+          "name": "initiated_by_user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "4sSvrlFR7LheRTjRTFOV-",
+          "name": "message",
+          "type": "TEXT",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "ScaJgEz9hGPfoM4UiSZBJ",
+          "name": "responded_by_user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "-9_gf5wppCdsPXchhbp67",
+          "name": "responded_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "v-MZS2c995WraBV53JOx_",
+          "name": "created_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "gC53BY9bucq2ajElilUcF",
+          "name": "updated_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        }
+      ],
+      "indices": [
+        {
+          "id": 0,
+          "name": "idx_join_request_position_candidate_status",
+          "fields": [
+            "project_position_id",
+            "candidate_user_id",
+            "status"
+          ],
+          "unique": false
+        },
+        {
+          "id": 1,
+          "name": "idx_join_request_candidate",
+          "fields": [
+            "candidate_user_id"
+          ],
+          "unique": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 251.2144657956028,
+      "y": 1852.8376787086913
+    },
+    {
+      "id": "r-HeZBNt25vJevCazmKmb",
+      "name": "support_ticket",
+      "comment": "",
+      "color": "#b56b45",
+      "fields": [
+        {
+          "id": "e5iuu5PFCyhJVdVy7Zk8w",
+          "name": "id",
+          "type": "UUID",
+          "default": "gen_random_uuid()",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "jOXa5AWVUxD3gbof__o0W",
+          "name": "author_user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "LEO9fFXUiQIh3kXNNiWRv",
+          "name": "assigned_user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "1hxfdtvpJYLtuWn9j4QFH",
+          "name": "type",
+          "type": "SUPPORT_TICKET_TYPE",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "2O0evlpzzUQQ1Z4XcfLmC",
+          "name": "status",
+          "type": "SUPPORT_TICKET_STATUS",
+          "default": "open",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "SxT_f0DMJg52XLyz01mEN",
+          "name": "source",
+          "type": "SUPPORT_TICKET_SOURCE",
+          "default": "web",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "5JiSNMTKfsTVcVWDQxMag",
+          "name": "subject",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "255"
+        },
+        {
+          "id": "BkjCdpj0KL3k9wqHEDd_7",
+          "name": "description",
+          "type": "TEXT",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "-32ZXN8VCkXHKLJSbIRLR",
+          "name": "target_user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "i3talcBDlccjLgrWkFk-J",
+          "name": "target_project_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "H47OqNQ-RcJAsOFTSvLqf",
+          "name": "resolution",
+          "type": "TEXT",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "OdJh0jpZBX5VpXF7PYT-t",
+          "name": "feedback_rating",
+          "type": "INTEGER",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "EHLBMKSH9KsUn6ww7BoYp",
+          "name": "feedback_comment",
+          "type": "TEXT",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "HY_aHm8f30rv3YJ3n2gcU",
+          "name": "created_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "Svr8PaF6lI5WU7p4_bV6f",
+          "name": "updated_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "ccznjYvEBxETfOb3-bHPi",
+          "name": "resolved_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "BdeI4o1coi1XpNOr_lMii",
+          "name": "closed_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        }
+      ],
+      "indices": [
+        {
+          "id": 0,
+          "name": "idx_support_ticket_author",
+          "fields": [
+            "author_user_id"
+          ],
+          "unique": false
+        },
+        {
+          "id": 1,
+          "name": "idx_support_ticket_assignee",
+          "fields": [
+            "assigned_user_id"
+          ],
+          "unique": false
+        },
+        {
+          "id": 2,
+          "name": "idx_support_ticket_status",
+          "fields": [
+            "status"
+          ],
+          "unique": false
+        },
+        {
+          "id": 3,
+          "name": "idx_support_ticket_target_user",
+          "fields": [
+            "target_user_id"
+          ],
+          "unique": false
+        },
+        {
+          "id": 4,
+          "name": "idx_support_ticket_target_project",
+          "fields": [
+            "target_project_id"
+          ],
+          "unique": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 2830.1833512665835,
+      "y": 1315.8910007686704
+    },
+    {
+      "id": "d4XXyJbrAJocmywsCYfao",
+      "name": "message",
+      "comment": "",
+      "color": "#5969a6",
+      "fields": [
+        {
+          "id": "sOHiIaXULp7pwn1iRDCX5",
+          "name": "id",
+          "type": "UUID",
+          "default": "gen_random_uuid()",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "TMCKJc4KlElHyfio5nRi7",
+          "name": "sender_user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "AbX3mfU3gw5dT2yZfzm2r",
+          "name": "join_request_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "QKndwMpTLneml9i5DTCUZ",
+          "name": "support_ticket_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "rxOh0O_Kmd6h0BLoTUbu8",
+          "name": "body",
+          "type": "TEXT",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "iIfMMmES01lNzm3sJNrvP",
+          "name": "attachments",
+          "type": "JSONB",
+          "default": "[]",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "qhDFsbGltXbsD1BWjAiSZ",
+          "name": "created_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "OQD0-AytRyLThHmDm4p7d",
+          "name": "edited_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "PDVQ883-TqAaijfWeCcET",
+          "name": "deleted_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        }
+      ],
+      "indices": [
+        {
+          "id": 0,
+          "name": "idx_message_sender",
+          "fields": [
+            "sender_user_id"
+          ],
+          "unique": false
+        },
+        {
+          "id": 1,
+          "name": "idx_message_join_request",
+          "fields": [
+            "join_request_id"
+          ],
+          "unique": false
+        },
+        {
+          "id": 2,
+          "name": "idx_message_support_ticket",
+          "fields": [
+            "support_ticket_id"
+          ],
+          "unique": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 1959.6111053021032,
+      "y": 1778.1054665642732
+    },
+    {
+      "id": "wv_qBva_1_FGhnxwe9Ebr",
+      "name": "notification",
+      "comment": "",
+      "color": "#5969a6",
+      "fields": [
+        {
+          "id": "6BnjnfAEdPFAOfnpbaW41",
+          "name": "id",
+          "type": "UUID",
+          "default": "gen_random_uuid()",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "JiMOkmmj9xM6-W4tk2g7N",
+          "name": "user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "Iqg_rRGhnC6KPySkPDkmg",
+          "name": "type",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "100"
+        },
+        {
+          "id": "5h3Q4ChpUxb7NYKrb6w-j",
+          "name": "data",
+          "type": "JSONB",
+          "default": "{}",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "v9Dru5dLxFuSjK32unb78",
+          "name": "created_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "YYvyEKjl82sIhBN4pBTQl",
+          "name": "read_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        }
+      ],
+      "indices": [
+        {
+          "id": 0,
+          "name": "idx_notification_user",
+          "fields": [
+            "user_id"
+          ],
+          "unique": false
+        },
+        {
+          "id": 1,
+          "name": "idx_notification_user_read",
+          "fields": [
+            "user_id",
+            "read_at"
+          ],
+          "unique": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 2912.367034587297,
+      "y": 423.70496233658577
+    },
+    {
+      "id": "O4qkwEb_wbbSjemGWbzI_",
+      "name": "review",
+      "comment": "",
+      "color": "#5969a6",
+      "fields": [
+        {
+          "id": "E3sAnJhWg7nMgCJfTpOG2",
+          "name": "id",
+          "type": "UUID",
+          "default": "gen_random_uuid()",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "NEChnPne_98gXWQjlJ53J",
+          "name": "project_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "LZO7hARXCMpuQVs40YoP0",
+          "name": "author_user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "ebs-46N1pwI40Tdh24ie1",
+          "name": "target_type",
+          "type": "REVIEW_TARGET_TYPE",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "Os7Tk1lbMDDGnbBEnKIgE",
+          "name": "target_user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "5OtoaH-tLEq46L3bZzQpD",
+          "name": "rating",
+          "type": "INTEGER",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "ejhE1DlYRocl7idE2OIQj",
+          "name": "comment",
+          "type": "TEXT",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "L-5OJMOLyMoky9Yn6vwPR",
+          "name": "created_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "IUIq_5HkPijq7zCDTD1E7",
+          "name": "updated_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        }
+      ],
+      "indices": [
+        {
+          "id": 0,
+          "name": "idx_review_project",
+          "fields": [
+            "project_id"
+          ],
+          "unique": false
+        },
+        {
+          "id": 1,
+          "name": "idx_review_author",
+          "fields": [
+            "author_user_id"
+          ],
+          "unique": false
+        },
+        {
+          "id": 2,
+          "name": "idx_review_target_user",
+          "fields": [
+            "target_user_id"
+          ],
+          "unique": false
+        },
+        {
+          "id": 3,
+          "name": "idx_review_target",
+          "fields": [
+            "target_type",
+            "target_user_id"
+          ],
+          "unique": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 2063.814973096536,
+      "y": 179.53439815547813
     }
   ],
-  "relationships": [],
+  "relationships": [
+    {
+      "id": "sJVYHJL0FCxT2ci_HOCci",
+      "name": "user_account_status_changed_by",
+      "startTableId": "JK015UVF7E_7VAeWNl9lN",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "5vnaZl2KHxBU-TJczZBme",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "5vnaZl2KHxBU-TJczZBme",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "eq8r4lPEHyoH2BsF1sv9d",
+      "name": "user_profile_user",
+      "startTableId": "gFOnH0g6Zx_x6GqSTXWHF",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "cNjrL9TFd9Blt60E6MQKK",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "cNjrL9TFd9Blt60E6MQKK",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "one_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "q6mEwOpp9tYoW7wKj6o_S",
+      "name": "project_owner",
+      "startTableId": "FnheUIAdZOPQlRr9ztKmI",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "txwCArwvsaiIhK2JQSwZW",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "txwCArwvsaiIhK2JQSwZW",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "NOjO0RJcBhz6AE7PGaFot",
+      "name": "project_moderator",
+      "startTableId": "FnheUIAdZOPQlRr9ztKmI",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "xeXxSW3cCUzo5cz2hSQlM",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "xeXxSW3cCUzo5cz2hSQlM",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "q7QDO0letpQ5aABGU9zEA",
+      "name": "project_position_project",
+      "startTableId": "vjvA6XkqlhmUmHgG9gXMO",
+      "endTableId": "FnheUIAdZOPQlRr9ztKmI",
+      "fields": [
+        {
+          "startFieldId": "Zr5lN3aqaadIQOOCHtPsh",
+          "endFieldId": "_IpU3XAx9tA1tS0-DTZCa"
+        }
+      ],
+      "startFieldId": "Zr5lN3aqaadIQOOCHtPsh",
+      "endFieldId": "_IpU3XAx9tA1tS0-DTZCa",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "PUdwGZTinUTfJ1JlWMGBH",
+      "name": "project_member_project",
+      "startTableId": "ljNgCe3m-d49Taghcf6a-",
+      "endTableId": "FnheUIAdZOPQlRr9ztKmI",
+      "fields": [
+        {
+          "startFieldId": "4KO03Hgy7wUp3J61gEwLZ",
+          "endFieldId": "_IpU3XAx9tA1tS0-DTZCa"
+        }
+      ],
+      "startFieldId": "4KO03Hgy7wUp3J61gEwLZ",
+      "endFieldId": "_IpU3XAx9tA1tS0-DTZCa",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "zqWhHpJ3YsGpBpgYn1srg",
+      "name": "project_member_user",
+      "startTableId": "ljNgCe3m-d49Taghcf6a-",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "BfOujSc1vKiCC0DP50hK5",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "BfOujSc1vKiCC0DP50hK5",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "uHkNDdMaYQg5RzDHx4ege",
+      "name": "project_member_position",
+      "startTableId": "ljNgCe3m-d49Taghcf6a-",
+      "endTableId": "vjvA6XkqlhmUmHgG9gXMO",
+      "fields": [
+        {
+          "startFieldId": "czchqirVmwbWi8Psj-jpI",
+          "endFieldId": "-R6WiRZ5FWwZI5iqqup-5"
+        }
+      ],
+      "startFieldId": "czchqirVmwbWi8Psj-jpI",
+      "endFieldId": "-R6WiRZ5FWwZI5iqqup-5",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "ReY-eDVmeudqIj3Xz2AAc",
+      "name": "project_join_request_position",
+      "startTableId": "AW97uJLQzT46gVsLtzpc0",
+      "endTableId": "vjvA6XkqlhmUmHgG9gXMO",
+      "fields": [
+        {
+          "startFieldId": "ksQ9YB_KSsxW4-8eZKXml",
+          "endFieldId": "-R6WiRZ5FWwZI5iqqup-5"
+        }
+      ],
+      "startFieldId": "ksQ9YB_KSsxW4-8eZKXml",
+      "endFieldId": "-R6WiRZ5FWwZI5iqqup-5",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "oT7P412a-uxCm1ClJ53OY",
+      "name": "project_join_request_candidate",
+      "startTableId": "AW97uJLQzT46gVsLtzpc0",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "4e2V0K0KADhTfRin8AvHx",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "4e2V0K0KADhTfRin8AvHx",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "VecUz3ShgoceTYCsTewdz",
+      "name": "project_join_request_initiator",
+      "startTableId": "AW97uJLQzT46gVsLtzpc0",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "kq1G21wnHO4og9bZ3jLAP",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "kq1G21wnHO4og9bZ3jLAP",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "VQ3Sm7XYPJ4KCJkVLAj4j",
+      "name": "project_join_request_responder",
+      "startTableId": "AW97uJLQzT46gVsLtzpc0",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "ScaJgEz9hGPfoM4UiSZBJ",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "ScaJgEz9hGPfoM4UiSZBJ",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "hbdehq1jYvJ-TtMWoJEjQ",
+      "name": "support_ticket_author",
+      "startTableId": "r-HeZBNt25vJevCazmKmb",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "jOXa5AWVUxD3gbof__o0W",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "jOXa5AWVUxD3gbof__o0W",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "wBFEO8y1XbX6HcKEVMZ5m",
+      "name": "support_ticket_assignee",
+      "startTableId": "r-HeZBNt25vJevCazmKmb",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "LEO9fFXUiQIh3kXNNiWRv",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "LEO9fFXUiQIh3kXNNiWRv",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "Qqm97fEzlurwqkmdngnDG",
+      "name": "support_ticket_target_user",
+      "startTableId": "r-HeZBNt25vJevCazmKmb",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "-32ZXN8VCkXHKLJSbIRLR",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "-32ZXN8VCkXHKLJSbIRLR",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "iQZyerFzTZgyes5bg1ku6",
+      "name": "support_ticket_target_project",
+      "startTableId": "r-HeZBNt25vJevCazmKmb",
+      "endTableId": "FnheUIAdZOPQlRr9ztKmI",
+      "fields": [
+        {
+          "startFieldId": "i3talcBDlccjLgrWkFk-J",
+          "endFieldId": "_IpU3XAx9tA1tS0-DTZCa"
+        }
+      ],
+      "startFieldId": "i3talcBDlccjLgrWkFk-J",
+      "endFieldId": "_IpU3XAx9tA1tS0-DTZCa",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "XyNG7xX0zV5gc5-LOzXaj",
+      "name": "message_sender",
+      "startTableId": "d4XXyJbrAJocmywsCYfao",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "TMCKJc4KlElHyfio5nRi7",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "TMCKJc4KlElHyfio5nRi7",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "E7x90oXdNWoEFOlnqCUyV",
+      "name": "message_join_request",
+      "startTableId": "d4XXyJbrAJocmywsCYfao",
+      "endTableId": "AW97uJLQzT46gVsLtzpc0",
+      "fields": [
+        {
+          "startFieldId": "AbX3mfU3gw5dT2yZfzm2r",
+          "endFieldId": "1sRqtu95JzDdp8IFg3CmK"
+        }
+      ],
+      "startFieldId": "AbX3mfU3gw5dT2yZfzm2r",
+      "endFieldId": "1sRqtu95JzDdp8IFg3CmK",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "X4aTZoVr8sueCILxJLtBd",
+      "name": "message_support_ticket",
+      "startTableId": "d4XXyJbrAJocmywsCYfao",
+      "endTableId": "r-HeZBNt25vJevCazmKmb",
+      "fields": [
+        {
+          "startFieldId": "QKndwMpTLneml9i5DTCUZ",
+          "endFieldId": "e5iuu5PFCyhJVdVy7Zk8w"
+        }
+      ],
+      "startFieldId": "QKndwMpTLneml9i5DTCUZ",
+      "endFieldId": "e5iuu5PFCyhJVdVy7Zk8w",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "Is7hTLf-GAEZ5kPEtkaoD",
+      "name": "notification_user",
+      "startTableId": "wv_qBva_1_FGhnxwe9Ebr",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "JiMOkmmj9xM6-W4tk2g7N",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "JiMOkmmj9xM6-W4tk2g7N",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "PRmtFIH2wWJoiamnP0cUx",
+      "name": "review_project",
+      "startTableId": "O4qkwEb_wbbSjemGWbzI_",
+      "endTableId": "FnheUIAdZOPQlRr9ztKmI",
+      "fields": [
+        {
+          "startFieldId": "NEChnPne_98gXWQjlJ53J",
+          "endFieldId": "_IpU3XAx9tA1tS0-DTZCa"
+        }
+      ],
+      "startFieldId": "NEChnPne_98gXWQjlJ53J",
+      "endFieldId": "_IpU3XAx9tA1tS0-DTZCa",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "BvlSm-A_ZNYxGgmvO-4kc",
+      "name": "review_author",
+      "startTableId": "O4qkwEb_wbbSjemGWbzI_",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "LZO7hARXCMpuQVs40YoP0",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "LZO7hARXCMpuQVs40YoP0",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "A37MWbGpeWRsXbz0Ax-QL",
+      "name": "review_target_user",
+      "startTableId": "O4qkwEb_wbbSjemGWbzI_",
+      "endTableId": "JK015UVF7E_7VAeWNl9lN",
+      "fields": [
+        {
+          "startFieldId": "Os7Tk1lbMDDGnbBEnKIgE",
+          "endFieldId": "nMKnqFbqUfzEfmrtKzahk"
+        }
+      ],
+      "startFieldId": "Os7Tk1lbMDDGnbBEnKIgE",
+      "endFieldId": "nMKnqFbqUfzEfmrtKzahk",
+      "cardinality": "many_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    }
+  ],
   "notes": [],
   "subjectAreas": [],
   "views": [],
   "database": "postgresql",
   "types": [],
-  "enums": [],
+  "enums": [
+    {
+      "id": "khHXrEowVio-7TeLPcceE",
+      "name": "user_account_status",
+      "values": [
+        "pending_email_verification",
+        "active",
+        "blocked",
+        "deleted"
+      ]
+    },
+    {
+      "id": "CCFskOb7NuqUIQ-ni1Ume",
+      "name": "system_role_code",
+      "values": [
+        "client",
+        "moderator",
+        "administrator"
+      ]
+    },
+    {
+      "id": "Ww3IwZm0W0bpwEeMS5LzC",
+      "name": "project_status",
+      "values": [
+        "draft",
+        "pending_moderation",
+        "recruiting",
+        "active",
+        "completed",
+        "cancelled",
+        "rejected",
+        "hidden"
+      ]
+    },
+    {
+      "id": "KLzPUSJ_lrs2N5pLMSeFy",
+      "name": "project_member_status",
+      "values": [
+        "active",
+        "left",
+        "removed"
+      ]
+    },
+    {
+      "id": "il9eY7F_PSz2CJm4sbCaC",
+      "name": "join_request_type",
+      "values": [
+        "application",
+        "invitation"
+      ]
+    },
+    {
+      "id": "PF9wvYxekJszRKE8674-o",
+      "name": "join_request_status",
+      "values": [
+        "pending",
+        "accepted",
+        "rejected",
+        "cancelled"
+      ]
+    },
+    {
+      "id": "FXmY201NJBK1XYNeeeT0V",
+      "name": "support_ticket_type",
+      "values": [
+        "support",
+        "complaint",
+        "moderation"
+      ]
+    },
+    {
+      "id": "wl2tMs50lVNQfodMTYKbt",
+      "name": "support_ticket_status",
+      "values": [
+        "open",
+        "in_progress",
+        "waiting_for_user",
+        "resolved",
+        "closed"
+      ]
+    },
+    {
+      "id": "fPeKWyGkYkbFpkMzgAAGO",
+      "name": "support_ticket_source",
+      "values": [
+        "web",
+        "bot"
+      ]
+    },
+    {
+      "id": "AvAK-Nf33EFiFT3IS4ikZ",
+      "name": "review_target_type",
+      "values": [
+        "project",
+        "user"
+      ]
+    }
+  ],
   "title": "Untitled Diagram"
 }

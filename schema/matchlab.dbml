@@ -1,4 +1,351 @@
-Table user [headercolor: #175e7a] {
-	uuid uuid [ pk, not null ]
-	password_hash varchar(60) [ not null ]
+enum user_account_status {
+	pending_email_verification
+	active
+	blocked
+	deleted
+}
+
+enum system_role_code {
+	client
+	moderator
+	administrator
+}
+
+enum project_status {
+	draft
+	pending_moderation
+	recruiting
+	active
+	completed
+	cancelled
+	rejected
+	hidden
+}
+
+enum project_member_status {
+	active
+	left
+	removed
+}
+
+enum join_request_type {
+	application
+	invitation
+}
+
+enum join_request_status {
+	pending
+	accepted
+	rejected
+	cancelled
+}
+
+enum support_ticket_type {
+	support
+	complaint
+	moderation
+}
+
+enum support_ticket_status {
+	open
+	in_progress
+	waiting_for_user
+	resolved
+	closed
+}
+
+enum support_ticket_source {
+	web
+	bot
+}
+
+enum review_target_type {
+	project
+	user
+}
+
+Table user_account [headercolor: #175e7a] {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	email varchar(320) [ not null, unique ]
+	email_domain varchar(255) [ not null ]
+	password_hash varchar(255) [ not null ]
+	role system_role_code [ not null, default: client ]
+	status user_account_status [ not null, default: pending_email_verification ]
+	email_verified_at timestamptz
+	email_verification_token_hash varchar(64) [ unique ]
+	email_verification_expires_at timestamptz
+	status_changed_by_user_id uuid
+	status_changed_at timestamptz
+	status_comment text
+	last_login_at timestamptz
+	created_at timestamptz [ not null, default: `now()` ]
+	updated_at timestamptz [ not null, default: `now()` ]
+
+	indexes {
+		(email_domain) [ name: 'idx_user_account_email_domain' ]
+		(status) [ name: 'idx_user_account_status' ]
+	}
+}
+
+Table trusted_email_domain [headercolor: #175e7a] {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	domain varchar(255) [ not null, unique ]
+	organization_name varchar(255) [ not null ]
+	is_active boolean [ not null, default: true ]
+	created_at timestamptz [ not null, default: `now()` ]
+	updated_at timestamptz [ not null, default: `now()` ]
+}
+
+Table user_profile [headercolor: #317256] {
+	user_id uuid [ pk, not null ]
+	schema_version integer [ not null, default: 1 ]
+	data jsonb [ not null, default: '{}' ]
+	created_at timestamptz [ not null, default: `now()` ]
+	updated_at timestamptz [ not null, default: `now()` ]
+}
+
+Table project [headercolor: #317256] {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	owner_user_id uuid [ not null ]
+	title varchar(255) [ not null ]
+	summary text
+	data jsonb [ not null, default: '{}' ]
+	status project_status [ not null, default: draft ]
+	planned_start_date date
+	planned_end_date date
+	started_at timestamptz
+	completed_at timestamptz
+	published_at timestamptz
+	moderated_by_user_id uuid
+	moderated_at timestamptz
+	moderation_comment text
+	created_at timestamptz [ not null, default: `now()` ]
+	updated_at timestamptz [ not null, default: `now()` ]
+
+	indexes {
+		(owner_user_id) [ name: 'idx_project_owner' ]
+		(status) [ name: 'idx_project_status' ]
+	}
+}
+
+Table project_position [headercolor: #317256] {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	project_id uuid [ not null ]
+	title varchar(255) [ not null ]
+	description text
+	slots_count integer [ not null, default: 1 ]
+	is_open boolean [ not null, default: true ]
+	data jsonb [ not null, default: '{}' ]
+	created_at timestamptz [ not null, default: `now()` ]
+	updated_at timestamptz [ not null, default: `now()` ]
+
+	indexes {
+		(project_id) [ name: 'idx_project_position_project' ]
+	}
+}
+
+Table project_member [headercolor: #b07a32] {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	project_id uuid [ not null ]
+	user_id uuid [ not null ]
+	project_position_id uuid
+	status project_member_status [ not null, default: active ]
+	joined_at timestamptz [ not null, default: `now()` ]
+	left_at timestamptz
+
+	indexes {
+		(project_id, user_id) [ name: 'uq_project_member_project_user', unique ]
+		(user_id) [ name: 'idx_project_member_user' ]
+		(project_position_id) [ name: 'idx_project_member_position' ]
+	}
+}
+
+Table project_join_request [headercolor: #b07a32] {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	project_position_id uuid [ not null ]
+	candidate_user_id uuid [ not null ]
+	type join_request_type [ not null ]
+	status join_request_status [ not null, default: pending ]
+	initiated_by_user_id uuid [ not null ]
+	message text
+	responded_by_user_id uuid
+	responded_at timestamptz
+	created_at timestamptz [ not null, default: `now()` ]
+	updated_at timestamptz [ not null, default: `now()` ]
+
+	indexes {
+		(project_position_id, candidate_user_id, status) [ name: 'idx_join_request_position_candidate_status' ]
+		(candidate_user_id) [ name: 'idx_join_request_candidate' ]
+	}
+}
+
+Table support_ticket [headercolor: #b56b45] {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	author_user_id uuid [ not null ]
+	assigned_user_id uuid
+	type support_ticket_type [ not null ]
+	status support_ticket_status [ not null, default: open ]
+	source support_ticket_source [ not null, default: web ]
+	subject varchar(255) [ not null ]
+	description text [ not null ]
+	target_user_id uuid
+	target_project_id uuid
+	resolution text
+	feedback_rating integer
+	feedback_comment text
+	created_at timestamptz [ not null, default: `now()` ]
+	updated_at timestamptz [ not null, default: `now()` ]
+	resolved_at timestamptz
+	closed_at timestamptz
+
+	indexes {
+		(author_user_id) [ name: 'idx_support_ticket_author' ]
+		(assigned_user_id) [ name: 'idx_support_ticket_assignee' ]
+		(status) [ name: 'idx_support_ticket_status' ]
+		(target_user_id) [ name: 'idx_support_ticket_target_user' ]
+		(target_project_id) [ name: 'idx_support_ticket_target_project' ]
+	}
+}
+
+Table message [headercolor: #5969a6] {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	sender_user_id uuid [ not null ]
+	join_request_id uuid
+	support_ticket_id uuid
+	body text [ not null ]
+	attachments jsonb [ not null, default: '[]' ]
+	created_at timestamptz [ not null, default: `now()` ]
+	edited_at timestamptz
+	deleted_at timestamptz
+
+	indexes {
+		(sender_user_id) [ name: 'idx_message_sender' ]
+		(join_request_id) [ name: 'idx_message_join_request' ]
+		(support_ticket_id) [ name: 'idx_message_support_ticket' ]
+	}
+}
+
+Table notification [headercolor: #5969a6] {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	user_id uuid [ not null ]
+	type varchar(100) [ not null ]
+	data jsonb [ not null, default: '{}' ]
+	created_at timestamptz [ not null, default: `now()` ]
+	read_at timestamptz
+
+	indexes {
+		(user_id) [ name: 'idx_notification_user' ]
+		(user_id, read_at) [ name: 'idx_notification_user_read' ]
+	}
+}
+
+Table review [headercolor: #5969a6] {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	project_id uuid [ not null ]
+	author_user_id uuid [ not null ]
+	target_type review_target_type [ not null ]
+	target_user_id uuid
+	rating integer [ not null ]
+	comment text
+	created_at timestamptz [ not null, default: `now()` ]
+	updated_at timestamptz [ not null, default: `now()` ]
+
+	indexes {
+		(project_id) [ name: 'idx_review_project' ]
+		(author_user_id) [ name: 'idx_review_author' ]
+		(target_user_id) [ name: 'idx_review_target_user' ]
+		(target_type, target_user_id) [ name: 'idx_review_target' ]
+	}
+}
+
+Ref user_account_status_changed_by {
+	user_account.status_changed_by_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref user_profile_user {
+	user_profile.user_id - user_account.id [ delete: no action, update: no action ]
+}
+
+Ref project_owner {
+	project.owner_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref project_moderator {
+	project.moderated_by_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref project_position_project {
+	project_position.project_id > project.id [ delete: no action, update: no action ]
+}
+
+Ref project_member_project {
+	project_member.project_id > project.id [ delete: no action, update: no action ]
+}
+
+Ref project_member_user {
+	project_member.user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref project_member_position {
+	project_member.project_position_id > project_position.id [ delete: no action, update: no action ]
+}
+
+Ref project_join_request_position {
+	project_join_request.project_position_id > project_position.id [ delete: no action, update: no action ]
+}
+
+Ref project_join_request_candidate {
+	project_join_request.candidate_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref project_join_request_initiator {
+	project_join_request.initiated_by_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref project_join_request_responder {
+	project_join_request.responded_by_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref support_ticket_author {
+	support_ticket.author_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref support_ticket_assignee {
+	support_ticket.assigned_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref support_ticket_target_user {
+	support_ticket.target_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref support_ticket_target_project {
+	support_ticket.target_project_id > project.id [ delete: no action, update: no action ]
+}
+
+Ref message_sender {
+	message.sender_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref message_join_request {
+	message.join_request_id > project_join_request.id [ delete: no action, update: no action ]
+}
+
+Ref message_support_ticket {
+	message.support_ticket_id > support_ticket.id [ delete: no action, update: no action ]
+}
+
+Ref notification_user {
+	notification.user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref review_project {
+	review.project_id > project.id [ delete: no action, update: no action ]
+}
+
+Ref review_author {
+	review.author_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref review_target_user {
+	review.target_user_id > user_account.id [ delete: no action, update: no action ]
 }
