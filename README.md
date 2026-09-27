@@ -6,178 +6,255 @@
 
 ```mermaid
 erDiagram
-	user_account }o--|| user_account : references
-	user_profile ||--|| user_account : references
-	project }o--|| user_account : references
-	project }o--|| user_account : references
-	project_position }o--|| project : references
-	project_member }o--|| project : references
-	project_member }o--|| user_account : references
-	project_member }o--|| project_position : references
-	project_join_request }o--|| project_position : references
-	project_join_request }o--|| user_account : references
-	project_join_request }o--|| user_account : references
-	project_join_request }o--|| user_account : references
-	support_ticket }o--|| user_account : references
-	support_ticket }o--|| user_account : references
-	support_ticket }o--|| user_account : references
-	support_ticket }o--|| project : references
-	message }o--|| user_account : references
-	message }o--|| project_join_request : references
-	message }o--|| support_ticket : references
-	notification }o--|| user_account : references
-	review }o--|| project : references
-	review }o--|| user_account : references
-	review }o--|| user_account : references
-
-	user_account {
-		UUID id
-		VARCHAR(320) email
-		VARCHAR(255) email_domain
-		VARCHAR(255) password_hash
-		SYSTEM_ROLE_CODE role
-		USER_ACCOUNT_STATUS status
-		TIMESTAMPTZ email_verified_at
-		VARCHAR(64) email_verification_token_hash
-		TIMESTAMPTZ email_verification_expires_at
-		UUID status_changed_by_user_id
-		TIMESTAMPTZ status_changed_at
-		TEXT status_comment
-		TIMESTAMPTZ last_login_at
-		TIMESTAMPTZ created_at
-		TIMESTAMPTZ updated_at
-	}
-
-	trusted_email_domain {
-		UUID id
-		VARCHAR(255) domain
-		VARCHAR(255) organization_name
-		BOOLEAN is_active
-		TIMESTAMPTZ created_at
-		TIMESTAMPTZ updated_at
-	}
-
-	user_profile {
-		UUID user_id
-		INTEGER schema_version
-		JSONB data
-		TIMESTAMPTZ created_at
-		TIMESTAMPTZ updated_at
-	}
-
-	project {
-		UUID id
-		UUID owner_user_id
-		VARCHAR(255) title
-		TEXT summary
-		JSONB data
-		PROJECT_STATUS status
-		DATE planned_start_date
-		DATE planned_end_date
-		TIMESTAMPTZ started_at
-		TIMESTAMPTZ completed_at
-		TIMESTAMPTZ published_at
-		UUID moderated_by_user_id
-		TIMESTAMPTZ moderated_at
-		TEXT moderation_comment
-		TIMESTAMPTZ created_at
-		TIMESTAMPTZ updated_at
-	}
-
-	project_position {
-		UUID id
-		UUID project_id
-		VARCHAR(255) title
-		TEXT description
-		INTEGER slots_count
-		BOOLEAN is_open
-		JSONB data
-		TIMESTAMPTZ created_at
-		TIMESTAMPTZ updated_at
-	}
-
-	project_member {
-		UUID id
-		UUID project_id
-		UUID user_id
-		UUID project_position_id
-		PROJECT_MEMBER_STATUS status
-		TIMESTAMPTZ joined_at
-		TIMESTAMPTZ left_at
-	}
-
-	project_join_request {
-		UUID id
-		UUID project_position_id
-		UUID candidate_user_id
-		JOIN_REQUEST_TYPE type
-		JOIN_REQUEST_STATUS status
-		UUID initiated_by_user_id
-		TEXT message
-		UUID responded_by_user_id
-		TIMESTAMPTZ responded_at
-		TIMESTAMPTZ created_at
-		TIMESTAMPTZ updated_at
-	}
-
-	support_ticket {
-		UUID id
-		UUID author_user_id
-		UUID assigned_user_id
-		SUPPORT_TICKET_TYPE type
-		SUPPORT_TICKET_STATUS status
-		SUPPORT_TICKET_SOURCE source
-		VARCHAR(255) subject
-		TEXT description
-		UUID target_user_id
-		UUID target_project_id
-		TEXT resolution
-		INTEGER feedback_rating
-		TEXT feedback_comment
-		TIMESTAMPTZ created_at
-		TIMESTAMPTZ updated_at
-		TIMESTAMPTZ resolved_at
-		TIMESTAMPTZ closed_at
-	}
-
-	message {
-		UUID id
-		UUID sender_user_id
-		UUID join_request_id
-		UUID support_ticket_id
-		TEXT body
-		JSONB attachments
-		TIMESTAMPTZ created_at
-		TIMESTAMPTZ edited_at
-		TIMESTAMPTZ deleted_at
-	}
-
-	notification {
-		UUID id
-		UUID user_id
-		VARCHAR(100) type
-		JSONB data
-		TIMESTAMPTZ created_at
-		TIMESTAMPTZ read_at
-	}
-
-	review {
-		UUID id
-		UUID project_id
-		UUID author_user_id
-		REVIEW_TARGET_TYPE target_type
-		UUID target_user_id
-		INTEGER rating
-		TEXT comment
-		TIMESTAMPTZ created_at
-		TIMESTAMPTZ updated_at
-	}
+  user_account }o--|| user_account : references
+  user_profile ||--|| user_account : references
+  project }o--|| user_account : references
+  project_position }o--|| project : references
+  project_member }o--|| project : references
+  project_member }o--|| user_account : references
+  project_member }o--|| project_position : references
+  project_join_request }o--|| project_position : references
+  project_join_request }o--|| user_account : references
+  support_ticket }o--|| user_account : references
+  support_ticket }o--|| project : references
+  message }o--|| user_account : references
+  notification }o--|| user_account : references
+  review }o--|| project : references
+  review }o--|| user_account : references
+  user_privacy_settings ||--|| user_account : references
+  user_block }o--|| user_account : references
+  portfolio_item }o--|| user_account : references
+  chat_conversation }o--|| user_account : references
+  chat_conversation ||--|| project_join_request : references
+  chat_conversation ||--|| support_ticket : references
+  chat_participant }o--|| chat_conversation : references
+  chat_participant }o--|| user_account : references
+  support_ticket_attachment }o--|| support_ticket : references
+  message }o--|| chat_conversation : references
+  project_tag }o--|| project : references
+  project_position_skill }o--|| project_position : references
+  profile_skill }o--|| user_account : references
+  profile_interest }o--|| user_account : references
+  profile_credential }o--|| user_account : references
+  user_account {
+    uuid id PK
+    varchar(320) email UK
+    varchar(255) email_domain
+    varchar(255) password_hash
+    system_role_code role
+    user_account_status status
+    timestamptz email_verified_at
+    varchar(64) email_verification_token_hash UK
+    timestamptz email_verification_expires_at
+    uuid status_changed_by_user_id
+    timestamptz status_changed_at
+    text status_comment
+    timestamptz last_login_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  trusted_email_domain {
+    uuid id PK
+    varchar(255) domain UK
+    varchar(255) organization_name
+    boolean is_active
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  user_profile {
+    uuid user_id PK
+    integer schema_version
+    jsonb data
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  project {
+    uuid id PK
+    uuid owner_user_id
+    varchar(255) title
+    text summary
+    jsonb data
+    project_type type
+    varchar(120) field
+    project_status status
+    date planned_start_date
+    date planned_end_date
+    timestamptz started_at
+    timestamptz completed_at
+    timestamptz published_at
+    uuid moderated_by_user_id
+    timestamptz moderated_at
+    text moderation_comment
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  project_position {
+    uuid id PK
+    uuid project_id
+    varchar(255) title
+    text description
+    integer slots_count
+    boolean is_open
+    jsonb data
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  project_member {
+    uuid id PK
+    uuid project_id
+    uuid user_id
+    uuid project_position_id
+    project_member_status status
+    timestamptz joined_at
+    timestamptz left_at
+  }
+  project_join_request {
+    uuid id PK
+    uuid project_position_id
+    uuid candidate_user_id
+    join_request_type type
+    join_request_status status
+    uuid initiated_by_user_id
+    text message
+    uuid responded_by_user_id
+    timestamptz responded_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  support_ticket {
+    uuid id PK
+    uuid author_user_id
+    uuid assigned_user_id
+    support_ticket_type type
+    support_ticket_status status
+    support_ticket_source source
+    varchar(255) subject
+    text description
+    uuid target_user_id
+    uuid target_project_id
+    text resolution
+    integer feedback_rating
+    text feedback_comment
+    timestamptz created_at
+    timestamptz updated_at
+    timestamptz resolved_at
+    timestamptz closed_at
+  }
+  message {
+    uuid id PK
+    uuid conversation_id
+    uuid sender_user_id
+    text body
+    jsonb attachments
+    timestamptz created_at
+    timestamptz edited_at
+    timestamptz deleted_at
+  }
+  notification {
+    uuid id PK
+    uuid user_id
+    varchar(100) type
+    jsonb data
+    timestamptz created_at
+    timestamptz read_at
+  }
+  review {
+    uuid id PK
+    uuid project_id
+    uuid author_user_id
+    review_target_type target_type
+    uuid target_user_id
+    integer rating
+    text comment
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  user_privacy_settings {
+    uuid user_id PK
+    boolean show_participating_projects
+    boolean show_contacts
+    timestamptz updated_at
+  }
+  user_block {
+    uuid blocker_user_id
+    uuid blocked_user_id
+    timestamptz created_at
+  }
+  portfolio_item {
+    uuid id PK
+    uuid user_id
+    portfolio_work_type type
+    varchar(255) title
+    text description
+    text url
+    text evidence_file_url
+    portfolio_item_status status
+    uuid moderated_by_user_id
+    timestamptz moderated_at
+    text moderation_comment
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  chat_conversation {
+    uuid id PK
+    uuid created_by_user_id
+    uuid join_request_id UK
+    uuid support_ticket_id UK
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  chat_participant {
+    uuid conversation_id
+    uuid user_id
+    timestamptz joined_at
+    timestamptz last_read_at
+    timestamptz archived_at
+  }
+  support_ticket_attachment {
+    uuid id PK
+    uuid support_ticket_id
+    text file_url
+    varchar(255) file_name
+    varchar(100) content_type
+    timestamptz created_at
+  }
+  project_tag {
+    uuid project_id
+    varchar(100) tag
+  }
+  project_position_skill {
+    uuid project_position_id
+    varchar(100) skill
+  }
+  profile_skill {
+    uuid user_id
+    varchar(100) skill
+  }
+  profile_interest {
+    uuid user_id
+    varchar(100) interest
+  }
+  profile_credential {
+    uuid id PK
+    uuid user_id
+    varchar(255) title
+    varchar(255) institution
+    integer graduation_year
+    text evidence_file_url
+    profile_credential_status status
+    uuid moderated_by_user_id
+    timestamptz moderated_at
+    text moderation_comment
+    timestamptz created_at
+    timestamptz updated_at
+  }
 ```
 
 ## Содержимое
 
 - `schema/matchlab.dbml` — основной источник истины
 - `schema/matchlab.drawdb.json` — визуальное представление схемы для drawDB
+- `DATA_MODEL.md` — понятное описание сущностей, связей, ограничений и JSONB
 
 ## Принцип работы
 

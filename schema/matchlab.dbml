@@ -64,13 +64,37 @@ enum review_target_type {
 	user
 }
 
+enum project_type {
+	scientific
+	practical
+}
+
+enum portfolio_work_type {
+	scientific
+	project
+}
+
+enum profile_credential_status {
+	draft
+	pending_review
+	verified
+	rejected
+}
+
+enum portfolio_item_status {
+	draft
+	pending_review
+	verified
+	rejected
+}
+
 Table user_account [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
 	email varchar(320) [ not null, unique ]
 	email_domain varchar(255) [ not null ]
 	password_hash varchar(255) [ not null ]
-	role system_role_code [ not null, default: client ]
-	status user_account_status [ not null, default: pending_email_verification ]
+	role system_role_code [ not null, default: 'client' ]
+	status user_account_status [ not null, default: 'pending_email_verification' ]
 	email_verified_at timestamptz
 	email_verification_token_hash varchar(64) [ unique ]
 	email_verification_expires_at timestamptz
@@ -104,15 +128,76 @@ Table user_profile [headercolor: #317256] {
 	updated_at timestamptz [ not null, default: `now()` ]
 }
 
+Table user_privacy_settings {
+	user_id uuid [ pk, not null ]
+	show_participating_projects boolean [ not null, default: false ]
+	show_contacts boolean [ not null, default: false ]
+	updated_at timestamptz [ not null, default: `now()` ]
+}
+
+Table user_block {
+	blocker_user_id uuid [ not null ]
+	blocked_user_id uuid [ not null ]
+	created_at timestamptz [ not null, default: `now()` ]
+
+	indexes {
+		(blocker_user_id, blocked_user_id) [ pk, name: 'pk_user_block' ]
+		(blocked_user_id) [ name: 'idx_user_block_blocked' ]
+	}
+}
+
+Table profile_credential {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	user_id uuid [ not null ]
+	title varchar(255) [ not null ]
+	institution varchar(255) [ not null ]
+	graduation_year integer
+	evidence_file_url text
+	status profile_credential_status [ not null, default: 'draft' ]
+	moderated_by_user_id uuid
+	moderated_at timestamptz
+	moderation_comment text
+	created_at timestamptz [ not null, default: `now()` ]
+	updated_at timestamptz [ not null, default: `now()` ]
+
+	indexes {
+		(user_id) [ name: 'idx_profile_credential_user' ]
+		(status) [ name: 'idx_profile_credential_status' ]
+	}
+}
+
+Table portfolio_item {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	user_id uuid [ not null ]
+	type portfolio_work_type [ not null ]
+	title varchar(255) [ not null ]
+	description text [ not null ]
+	url text
+	evidence_file_url text
+	status portfolio_item_status [ not null, default: 'draft' ]
+	moderated_by_user_id uuid
+	moderated_at timestamptz
+	moderation_comment text
+	created_at timestamptz [ not null, default: `now()` ]
+	updated_at timestamptz [ not null, default: `now()` ]
+
+	indexes {
+		(user_id) [ name: 'idx_portfolio_item_user' ]
+		(status) [ name: 'idx_portfolio_item_status' ]
+	}
+}
+
 Table project [headercolor: #317256] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
 	owner_user_id uuid [ not null ]
 	title varchar(255) [ not null ]
 	summary text
+	type project_type [ not null ]
+	field varchar(120) [ not null ]
 	data jsonb [ not null, default: '{}' ]
-	status project_status [ not null, default: draft ]
+	status project_status [ not null, default: 'draft' ]
 	planned_start_date date
-	planned_end_date date
+	planned_end_date date [ ]
 	started_at timestamptz
 	completed_at timestamptz
 	published_at timestamptz
@@ -144,12 +229,52 @@ Table project_position [headercolor: #317256] {
 	}
 }
 
+Table project_tag {
+	project_id uuid [ not null ]
+	tag varchar(100) [ not null ]
+
+	indexes {
+		(project_id, tag) [ pk, name: 'pk_project_tag' ]
+		(tag) [ name: 'idx_project_tag_tag' ]
+	}
+}
+
+Table project_position_skill {
+	project_position_id uuid [ not null ]
+	skill varchar(100) [ not null ]
+
+	indexes {
+		(project_position_id, skill) [ pk, name: 'pk_project_position_skill' ]
+		(skill) [ name: 'idx_project_position_skill_skill' ]
+	}
+}
+
+Table profile_skill {
+	user_id uuid [ not null ]
+	skill varchar(100) [ not null ]
+
+	indexes {
+		(user_id, skill) [ pk, name: 'pk_profile_skill' ]
+		(skill) [ name: 'idx_profile_skill_skill' ]
+	}
+}
+
+Table profile_interest {
+	user_id uuid [ not null ]
+	interest varchar(100) [ not null ]
+
+	indexes {
+		(user_id, interest) [ pk, name: 'pk_profile_interest' ]
+		(interest) [ name: 'idx_profile_interest_interest' ]
+	}
+}
+
 Table project_member [headercolor: #b07a32] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
 	project_id uuid [ not null ]
 	user_id uuid [ not null ]
 	project_position_id uuid
-	status project_member_status [ not null, default: active ]
+	status project_member_status [ not null, default: 'active' ]
 	joined_at timestamptz [ not null, default: `now()` ]
 	left_at timestamptz
 
@@ -165,7 +290,7 @@ Table project_join_request [headercolor: #b07a32] {
 	project_position_id uuid [ not null ]
 	candidate_user_id uuid [ not null ]
 	type join_request_type [ not null ]
-	status join_request_status [ not null, default: pending ]
+	status join_request_status [ not null, default: 'pending' ]
 	initiated_by_user_id uuid [ not null ]
 	message text
 	responded_by_user_id uuid
@@ -174,7 +299,7 @@ Table project_join_request [headercolor: #b07a32] {
 	updated_at timestamptz [ not null, default: `now()` ]
 
 	indexes {
-		(project_position_id, candidate_user_id, status) [ name: 'idx_join_request_position_candidate_status' ]
+		(project_position_id, candidate_user_id) [ unique, name: 'uq_join_request_position_candidate' ]
 		(candidate_user_id) [ name: 'idx_join_request_candidate' ]
 	}
 }
@@ -184,14 +309,14 @@ Table support_ticket [headercolor: #b56b45] {
 	author_user_id uuid [ not null ]
 	assigned_user_id uuid
 	type support_ticket_type [ not null ]
-	status support_ticket_status [ not null, default: open ]
-	source support_ticket_source [ not null, default: web ]
+	status support_ticket_status [ not null, default: 'open' ]
+	source support_ticket_source [ not null, default: 'web' ]
 	subject varchar(255) [ not null ]
 	description text [ not null ]
-	target_user_id uuid
+	target_user_id uuid [ ]
 	target_project_id uuid
 	resolution text
-	feedback_rating integer
+	feedback_rating integer [ ]
 	feedback_comment text
 	created_at timestamptz [ not null, default: `now()` ]
 	updated_at timestamptz [ not null, default: `now()` ]
@@ -207,11 +332,49 @@ Table support_ticket [headercolor: #b56b45] {
 	}
 }
 
+Table chat_conversation {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	created_by_user_id uuid [ not null ]
+	join_request_id uuid [ unique ]
+	support_ticket_id uuid [ unique ]
+	created_at timestamptz [ not null, default: `now()` ]
+	updated_at timestamptz [ not null, default: `now()` ]
+
+	indexes {
+		(created_by_user_id) [ name: 'idx_chat_conversation_creator' ]
+	}
+}
+
+Table chat_participant {
+	conversation_id uuid [ not null ]
+	user_id uuid [ not null ]
+	joined_at timestamptz [ not null, default: `now()` ]
+	last_read_at timestamptz
+	archived_at timestamptz
+
+	indexes {
+		(conversation_id, user_id) [ pk, name: 'pk_chat_participant' ]
+		(user_id) [ name: 'idx_chat_participant_user' ]
+	}
+}
+
+Table support_ticket_attachment {
+	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	support_ticket_id uuid [ not null ]
+	file_url text [ not null ]
+	file_name varchar(255)
+	content_type varchar(100)
+	created_at timestamptz [ not null, default: `now()` ]
+
+	indexes {
+		(support_ticket_id) [ name: 'idx_support_ticket_attachment_ticket' ]
+	}
+}
+
 Table message [headercolor: #5969a6] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
+	conversation_id uuid [ not null ]
 	sender_user_id uuid [ not null ]
-	join_request_id uuid
-	support_ticket_id uuid
 	body text [ not null ]
 	attachments jsonb [ not null, default: '[]' ]
 	created_at timestamptz [ not null, default: `now()` ]
@@ -220,8 +383,7 @@ Table message [headercolor: #5969a6] {
 
 	indexes {
 		(sender_user_id) [ name: 'idx_message_sender' ]
-		(join_request_id) [ name: 'idx_message_join_request' ]
-		(support_ticket_id) [ name: 'idx_message_support_ticket' ]
+		(conversation_id, created_at) [ name: 'idx_message_conversation_created' ]
 	}
 }
 
@@ -244,7 +406,7 @@ Table review [headercolor: #5969a6] {
 	project_id uuid [ not null ]
 	author_user_id uuid [ not null ]
 	target_type review_target_type [ not null ]
-	target_user_id uuid
+	target_user_id uuid [ ]
 	rating integer [ not null ]
 	comment text
 	created_at timestamptz [ not null, default: `now()` ]
@@ -258,12 +420,84 @@ Table review [headercolor: #5969a6] {
 	}
 }
 
+Ref user_privacy_settings_user {
+	user_privacy_settings.user_id - user_account.id [ delete: no action, update: no action ]
+}
+
+Ref user_block_blocker {
+	user_block.blocker_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref user_block_blocked {
+	user_block.blocked_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref profile_credential_user {
+	profile_credential.user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref profile_credential_moderator {
+	profile_credential.moderated_by_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref portfolio_item_user {
+	portfolio_item.user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref portfolio_item_moderator {
+	portfolio_item.moderated_by_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref chat_conversation_creator {
+	chat_conversation.created_by_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref chat_conversation_join_request {
+	chat_conversation.join_request_id - project_join_request.id [ delete: no action, update: no action ]
+}
+
+Ref chat_conversation_support_ticket {
+	chat_conversation.support_ticket_id - support_ticket.id [ delete: no action, update: no action ]
+}
+
+Ref chat_participant_conversation {
+	chat_participant.conversation_id > chat_conversation.id [ delete: no action, update: no action ]
+}
+
+Ref chat_participant_user {
+	chat_participant.user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref support_ticket_attachment_ticket {
+	support_ticket_attachment.support_ticket_id > support_ticket.id [ delete: no action, update: no action ]
+}
+
+Ref message_conversation {
+	message.conversation_id > chat_conversation.id [ delete: no action, update: no action ]
+}
+
 Ref user_account_status_changed_by {
 	user_account.status_changed_by_user_id > user_account.id [ delete: no action, update: no action ]
 }
 
 Ref user_profile_user {
 	user_profile.user_id - user_account.id [ delete: no action, update: no action ]
+}
+
+Ref project_tag_project {
+	project_tag.project_id > project.id [ delete: no action, update: no action ]
+}
+
+Ref project_position_skill_position {
+	project_position_skill.project_position_id > project_position.id [ delete: no action, update: no action ]
+}
+
+Ref profile_skill_user {
+	profile_skill.user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref profile_interest_user {
+	profile_interest.user_id > user_account.id [ delete: no action, update: no action ]
 }
 
 Ref project_owner {
@@ -326,13 +560,7 @@ Ref message_sender {
 	message.sender_user_id > user_account.id [ delete: no action, update: no action ]
 }
 
-Ref message_join_request {
-	message.join_request_id > project_join_request.id [ delete: no action, update: no action ]
-}
 
-Ref message_support_ticket {
-	message.support_ticket_id > support_ticket.id [ delete: no action, update: no action ]
-}
 
 Ref notification_user {
 	notification.user_id > user_account.id [ delete: no action, update: no action ]
