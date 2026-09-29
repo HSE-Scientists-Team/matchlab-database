@@ -19,21 +19,8 @@
           "comment": ""
         },
         {
-          "id": "vEOpBqGtu43PB9Pb6QrbF",
-          "name": "email",
-          "type": "VARCHAR",
-          "default": "",
-          "check": "",
-          "primary": false,
-          "unique": true,
-          "notNull": true,
-          "increment": false,
-          "comment": "",
-          "size": "320"
-        },
-        {
-          "id": "DdHqRbMiw4w80fIHWA2Bg",
-          "name": "email_domain",
+          "id": "codex_O8Pr005EupFa7TJ3",
+          "name": "login",
           "type": "VARCHAR",
           "default": "",
           "check": "",
@@ -41,8 +28,8 @@
           "unique": false,
           "notNull": true,
           "increment": false,
-          "comment": "",
-          "size": "255"
+          "comment": "Stored lowercase; 1–32 chars: a-z, 0-9, underscore, dot, hyphen.",
+          "size": "32"
         },
         {
           "id": "zPfNdx_a6hypyRKEcQy-c",
@@ -73,48 +60,11 @@
           "id": "MTbt6vUEYPNpsfIH4T0G_",
           "name": "status",
           "type": "USER_ACCOUNT_STATUS",
-          "default": "pending_email_verification",
+          "default": "active",
           "check": "",
           "primary": false,
           "unique": false,
           "notNull": true,
-          "increment": false,
-          "comment": ""
-        },
-        {
-          "id": "TrY4hn7VZOjTb88sNsma1",
-          "name": "email_verified_at",
-          "type": "TIMESTAMPTZ",
-          "default": "",
-          "check": "",
-          "primary": false,
-          "unique": false,
-          "notNull": false,
-          "increment": false,
-          "comment": ""
-        },
-        {
-          "id": "2Wit6HkOJHIN2-xM2gMzn",
-          "name": "email_verification_token_hash",
-          "type": "VARCHAR",
-          "default": "",
-          "check": "",
-          "primary": false,
-          "unique": true,
-          "notNull": false,
-          "increment": false,
-          "comment": "",
-          "size": "64"
-        },
-        {
-          "id": "GQoaSHaOyHE5Vnf1ujl92",
-          "name": "email_verification_expires_at",
-          "type": "TIMESTAMPTZ",
-          "default": "",
-          "check": "",
-          "primary": false,
-          "unique": false,
-          "notNull": false,
           "increment": false,
           "comment": ""
         },
@@ -194,11 +144,11 @@
       "indices": [
         {
           "id": 0,
-          "name": "idx_user_account_email_domain",
+          "name": "user_account_login_unique",
           "fields": [
-            "email_domain"
+            "login"
           ],
-          "unique": false
+          "unique": true
         },
         {
           "id": 1,
@@ -2647,6 +2597,375 @@
       "collapsed": false,
       "x": 54,
       "y": 785
+    },
+    {
+      "id": "codex_VpGQm8l6874V7GSx",
+      "name": "user_email",
+      "comment": "Only confirmed email addresses; one per account and one account per normalized email.",
+      "color": "#175e7a",
+      "fields": [
+        {
+          "id": "codex__UBtD5QzWVJrvnod",
+          "name": "user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "codex_kwEIyHE6nj4pHX2p",
+          "name": "email",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": true,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "320"
+        },
+        {
+          "id": "codex_YrgIN6l58AlQsEsb",
+          "name": "verified_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        }
+      ],
+      "indices": [
+        {
+          "id": 0,
+          "name": "user_email_email_unique",
+          "fields": [
+            "email"
+          ],
+          "unique": true
+        }
+      ],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 54,
+      "y": 360
+    },
+    {
+      "id": "codex_pxfptChPzu0YoDXo",
+      "name": "email_verification_request",
+      "comment": "One pending email per account. Requests for the same email by different accounts are allowed.",
+      "color": "#b07a32",
+      "fields": [
+        {
+          "id": "codex_Z3Yrk7twlhZlY-hX",
+          "name": "user_id",
+          "type": "UUID",
+          "default": "",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "codex_5R98t4alxq24vKrV",
+          "name": "email",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "320"
+        },
+        {
+          "id": "codex_p5mFV0W2dV7TwHNQ",
+          "name": "token_hash",
+          "type": "CHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": true,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "64"
+        },
+        {
+          "id": "codex_oMs6j5SDHhEMoELT",
+          "name": "expires_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "codex_B31s685mfB2N5hmU",
+          "name": "created_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        }
+      ],
+      "indices": [
+        {
+          "id": 0,
+          "name": "email_verification_request_token_hash",
+          "fields": [
+            "token_hash"
+          ],
+          "unique": true
+        },
+        {
+          "id": 1,
+          "name": "idx_email_verification_email",
+          "fields": [
+            "email"
+          ],
+          "unique": false
+        },
+        {
+          "id": 2,
+          "name": "idx_email_verification_expires_at",
+          "fields": [
+            "expires_at"
+          ],
+          "unique": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 308,
+      "y": 360
+    },
+    {
+      "id": "codex_Az0vcebbfoIitra2",
+      "name": "email_outbox",
+      "comment": "Physical table mail.email_outbox. Mail-owned durable SMTP queue; token payload is AES-GCM encrypted.",
+      "color": "#75519a",
+      "fields": [
+        {
+          "id": "codex_92Mve4TGP3z9IVcy",
+          "name": "id",
+          "type": "BIGINT",
+          "default": "",
+          "check": "",
+          "primary": true,
+          "unique": false,
+          "notNull": true,
+          "increment": true,
+          "comment": ""
+        },
+        {
+          "id": "codex_GB8YBU7hGR_PYKnb",
+          "name": "idempotency_key",
+          "type": "CHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": true,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "64"
+        },
+        {
+          "id": "codex_icDaB-_dfaCEyxOa",
+          "name": "recipient",
+          "type": "VARCHAR",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "320"
+        },
+        {
+          "id": "codex_UZBUCqrhHY76IlKS",
+          "name": "token_ciphertext",
+          "type": "BYTEA",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "codex_vb1ThxkKmRlDI7J_",
+          "name": "token_nonce",
+          "type": "BYTEA",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "codex_s-V-l2YBz3RG0HnS",
+          "name": "expires_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "codex_GvUBQ_wi0X9mlYuC",
+          "name": "status",
+          "type": "VARCHAR",
+          "default": "pending",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": "",
+          "size": "16"
+        },
+        {
+          "id": "codex_7887lTefOdmInyNQ",
+          "name": "attempts",
+          "type": "INTEGER",
+          "default": "0",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "codex_jXiH56-0xGqY0MUP",
+          "name": "next_attempt_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "codex_J0Zep4gAohaVUhul",
+          "name": "lease_until",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "codex_Q-ixvI28mPWoylcY",
+          "name": "last_error",
+          "type": "TEXT",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "codex_MKQbqBLbNRt3BdHF",
+          "name": "created_at",
+          "type": "TIMESTAMPTZ",
+          "default": "now()",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": true,
+          "increment": false,
+          "comment": ""
+        },
+        {
+          "id": "codex_sYKHyS9axpW7XbG5",
+          "name": "sent_at",
+          "type": "TIMESTAMPTZ",
+          "default": "",
+          "check": "",
+          "primary": false,
+          "unique": false,
+          "notNull": false,
+          "increment": false,
+          "comment": ""
+        }
+      ],
+      "indices": [
+        {
+          "id": 0,
+          "name": "email_outbox_idempotency_key",
+          "fields": [
+            "idempotency_key"
+          ],
+          "unique": true
+        },
+        {
+          "id": 1,
+          "name": "email_outbox_pending_idx",
+          "fields": [
+            "status",
+            "next_attempt_at",
+            "created_at"
+          ],
+          "unique": false
+        },
+        {
+          "id": 2,
+          "name": "email_outbox_expired_lease_idx",
+          "fields": [
+            "lease_until"
+          ],
+          "unique": false
+        },
+        {
+          "id": 3,
+          "name": "email_outbox_sent_cleanup_idx",
+          "fields": [
+            "sent_at"
+          ],
+          "unique": false
+        }
+      ],
+      "uniqueConstraints": [],
+      "locked": false,
+      "collapsed": false,
+      "x": 562,
+      "y": 360
     }
   ],
   "relationships": [
@@ -3312,6 +3631,40 @@
       "cardinality": "many_to_one",
       "updateConstraint": "No action",
       "deleteConstraint": "No action"
+    },
+    {
+      "id": "codex_TWoO1M0ozrmw8wxv",
+      "name": "user_email_account",
+      "startTableId": "codex_VpGQm8l6874V7GSx",
+      "endTableId": "s_Kvr8jTCjiQMdVCJbWUx",
+      "fields": [
+        {
+          "startFieldId": "codex__UBtD5QzWVJrvnod",
+          "endFieldId": "6sRq6QqZR-NeXvGkxKstj"
+        }
+      ],
+      "startFieldId": "codex__UBtD5QzWVJrvnod",
+      "endFieldId": "6sRq6QqZR-NeXvGkxKstj",
+      "cardinality": "one_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
+    },
+    {
+      "id": "codex_JGejEKID1_Yayzvy",
+      "name": "email_verification_request_account",
+      "startTableId": "codex_pxfptChPzu0YoDXo",
+      "endTableId": "s_Kvr8jTCjiQMdVCJbWUx",
+      "fields": [
+        {
+          "startFieldId": "codex_Z3Yrk7twlhZlY-hX",
+          "endFieldId": "6sRq6QqZR-NeXvGkxKstj"
+        }
+      ],
+      "startFieldId": "codex_Z3Yrk7twlhZlY-hX",
+      "endFieldId": "6sRq6QqZR-NeXvGkxKstj",
+      "cardinality": "one_to_one",
+      "updateConstraint": "No action",
+      "deleteConstraint": "No action"
     }
   ],
   "notes": [],
@@ -3324,7 +3677,6 @@
       "id": "ngTeLLwA0aFmxNONZHMna",
       "name": "user_account_status",
       "values": [
-        "pending_email_verification",
         "active",
         "blocked",
         "deleted"

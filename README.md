@@ -1,12 +1,14 @@
 # MatchLab Database
 
-Репозиторий содержит актуальную модель данных проекта MatchLab.
+Репозиторий содержит актуальную модель данных проекта MatchLab. Логин и email разделены: в `user_account` email не хранится; почта и SMTP outbox представлены отдельными сущностями.
 
 ## ER-диаграмма
 
 ```mermaid
 erDiagram
   user_account }o--|| user_account : references
+  user_account ||--o| user_email : confirmed_email
+  user_account ||--o| email_verification_request : pending_email
   user_profile ||--|| user_account : references
   project }o--|| user_account : references
   project_position }o--|| project : references
@@ -38,20 +40,43 @@ erDiagram
   profile_credential }o--|| user_account : references
   user_account {
     uuid id PK
-    varchar(320) email UK
-    varchar(255) email_domain
+    varchar(32) login UK
     varchar(255) password_hash
     system_role_code role
     user_account_status status
-    timestamptz email_verified_at
-    varchar(64) email_verification_token_hash UK
-    timestamptz email_verification_expires_at
     uuid status_changed_by_user_id
     timestamptz status_changed_at
     text status_comment
     timestamptz last_login_at
     timestamptz created_at
     timestamptz updated_at
+  }
+  user_email {
+    uuid user_id PK, FK
+    varchar(320) email UK
+    timestamptz verified_at
+  }
+  email_verification_request {
+    uuid user_id PK, FK
+    varchar(320) email
+    char(64) token_hash UK
+    timestamptz expires_at
+    timestamptz created_at
+  }
+  email_outbox {
+    bigint id PK
+    char(64) idempotency_key UK
+    varchar(320) recipient
+    bytea token_ciphertext
+    bytea token_nonce
+    timestamptz expires_at
+    varchar(16) status
+    integer attempts
+    timestamptz next_attempt_at
+    timestamptz lease_until
+    text last_error
+    timestamptz created_at
+    timestamptz sent_at
   }
   trusted_email_domain {
     uuid id PK

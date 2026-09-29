@@ -1,5 +1,4 @@
 enum user_account_status {
-	pending_email_verification
 	active
 	blocked
 	deleted
@@ -90,14 +89,10 @@ enum portfolio_item_status {
 
 Table user_account [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
-	email varchar(320) [ not null, unique ]
-	email_domain varchar(255) [ not null ]
+	login varchar(32) [ not null ]
 	password_hash varchar(255) [ not null ]
 	role system_role_code [ not null, default: 'client' ]
-	status user_account_status [ not null, default: 'pending_email_verification' ]
-	email_verified_at timestamptz
-	email_verification_token_hash varchar(64) [ unique ]
-	email_verification_expires_at timestamptz
+	status user_account_status [ not null, default: 'active' ]
 	status_changed_by_user_id uuid
 	status_changed_at timestamptz
 	status_comment text
@@ -106,8 +101,51 @@ Table user_account [headercolor: #175e7a] {
 	updated_at timestamptz [ not null, default: `now()` ]
 
 	indexes {
-		(email_domain) [ name: 'idx_user_account_email_domain' ]
+		(login) [ name: 'user_account_login_unique', unique ]
 		(status) [ name: 'idx_user_account_status' ]
+	}
+}
+
+Table user_email [headercolor: #175e7a] {
+	user_id uuid [ pk, not null ]
+	email varchar(320) [ not null, unique ]
+	verified_at timestamptz [ not null, default: `now()` ]
+}
+
+Table email_verification_request [headercolor: #175e7a] {
+	user_id uuid [ pk, not null ]
+	email varchar(320) [ not null ]
+	token_hash char(64) [ not null, unique ]
+	expires_at timestamptz [ not null ]
+	created_at timestamptz [ not null, default: `now()` ]
+
+	indexes {
+		(email) [ name: 'idx_email_verification_email' ]
+		(expires_at) [ name: 'idx_email_verification_expires_at' ]
+	}
+}
+
+// Physical table: mail.email_outbox. Owned by the Mail service.
+Table email_outbox [headercolor: #75519a] {
+	id bigint [ pk, not null, increment ]
+	idempotency_key char(64) [ not null, unique ]
+	recipient varchar(320) [ not null ]
+	token_ciphertext bytea
+	token_nonce bytea
+	expires_at timestamptz [ not null ]
+	status varchar(16) [ not null, default: 'pending' ]
+	attempts integer [ not null, default: 0 ]
+	next_attempt_at timestamptz [ not null, default: `now()` ]
+	lease_until timestamptz
+	last_error text
+	created_at timestamptz [ not null, default: `now()` ]
+	sent_at timestamptz
+
+	indexes {
+		(idempotency_key) [ name: 'email_outbox_idempotency_key', unique ]
+		(status, next_attempt_at, created_at) [ name: 'email_outbox_pending_idx' ]
+		(lease_until) [ name: 'email_outbox_expired_lease_idx' ]
+		(sent_at) [ name: 'email_outbox_sent_cleanup_idx' ]
 	}
 }
 
@@ -478,6 +516,14 @@ Ref message_conversation {
 
 Ref user_account_status_changed_by {
 	user_account.status_changed_by_user_id > user_account.id [ delete: no action, update: no action ]
+}
+
+Ref user_email_account {
+	user_email.user_id - user_account.id [ delete: no action, update: no action ]
+}
+
+Ref email_verification_request_account {
+	email_verification_request.user_id - user_account.id [ delete: no action, update: no action ]
 }
 
 Ref user_profile_user {
