@@ -125,30 +125,6 @@ Table email_verification_request [headercolor: #175e7a] {
 	}
 }
 
-// Physical table: mail.email_outbox. Owned by the Mail service.
-Table email_outbox [headercolor: #75519a] {
-	id bigint [ pk, not null, increment ]
-	idempotency_key char(64) [ not null, unique ]
-	recipient varchar(320) [ not null ]
-	token_ciphertext bytea
-	token_nonce bytea
-	expires_at timestamptz [ not null ]
-	status varchar(16) [ not null, default: 'pending' ]
-	attempts integer [ not null, default: 0 ]
-	next_attempt_at timestamptz [ not null, default: `now()` ]
-	lease_until timestamptz
-	last_error text
-	created_at timestamptz [ not null, default: `now()` ]
-	sent_at timestamptz
-
-	indexes {
-		(idempotency_key) [ name: 'email_outbox_idempotency_key', unique ]
-		(status, next_attempt_at, created_at) [ name: 'email_outbox_pending_idx' ]
-		(lease_until) [ name: 'email_outbox_expired_lease_idx' ]
-		(sent_at) [ name: 'email_outbox_sent_cleanup_idx' ]
-	}
-}
-
 Table trusted_email_domain [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
 	domain varchar(255) [ not null, unique ]
