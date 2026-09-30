@@ -1,6 +1,6 @@
 # MatchLab Database
 
-Репозиторий содержит актуальную модель данных проекта MatchLab. Логин и email разделены: в `user_account` email не хранится; почта и SMTP outbox представлены отдельными сущностями.
+Репозиторий содержит актуальную модель данных проекта MatchLab. Логин и email разделены: в `user_account` email не хранится, а подтверждённые адреса и запросы на подтверждение представлены отдельными сущностями. Письма отправляются синхронно и не сохраняются в модели данных.
 
 ## ER-диаграмма
 
@@ -62,21 +62,6 @@ erDiagram
     char(64) token_hash UK
     timestamptz expires_at
     timestamptz created_at
-  }
-  email_outbox {
-    bigint id PK
-    char(64) idempotency_key UK
-    varchar(320) recipient
-    bytea token_ciphertext
-    bytea token_nonce
-    timestamptz expires_at
-    varchar(16) status
-    integer attempts
-    timestamptz next_attempt_at
-    timestamptz lease_until
-    text last_error
-    timestamptz created_at
-    timestamptz sent_at
   }
   trusted_email_domain {
     uuid id PK
@@ -278,16 +263,14 @@ erDiagram
 ## Содержимое
 
 - `schema/matchlab.dbml` — основной источник истины
-- `schema/matchlab.drawdb.json` — визуальное представление схемы для drawDB
 - `DATA_MODEL.md` — понятное описание сущностей, связей, ограничений и JSONB
 
 ## Принцип работы
 
-Схема проектируется визуально в drawDB или редактируется напрямую в DBML.
+Схема поддерживается только в DBML.
 
 Алгоритм внесения изменений:
-1) загружаем `schema/matchlab.drawdb.json` в [DrawDB](https://www.drawdb.app/editor)
-2) вносим необходимые изменения
-3) экспортируем DBML и JSON в директорию `schema` и заменяем прежнюю версию
-4) экспортируем Mermaid схему и кладем в этот readme
-5) пушим изменения в мастер
+1) обновляем `schema/matchlab.dbml`
+2) синхронизируем Mermaid-схему в этом readme
+3) обновляем `DATA_MODEL.md`
+4) пушим изменения в мастер
