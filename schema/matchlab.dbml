@@ -89,7 +89,7 @@ enum portfolio_item_status {
 
 Table user_account [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
-	login varchar(32) [ not null ]
+	email varchar(320) [ not null, note: 'Обязательный email для входа, нормализован в нижний регистр' ]
 	password_hash varchar(255) [ not null ]
 	role system_role_code [ not null, default: 'client' ]
 	status user_account_status [ not null, default: 'active' ]
@@ -101,7 +101,8 @@ Table user_account [headercolor: #175e7a] {
 	updated_at timestamptz [ not null, default: `now()` ]
 
 	indexes {
-		(login) [ name: 'user_account_login_unique', unique ]
+		(email) [ name: 'user_account_email_unique', unique ]
+		(id, email) [ name: 'user_account_id_email_unique', unique ]
 		(status) [ name: 'idx_user_account_status' ]
 	}
 }
@@ -112,16 +113,15 @@ Table user_email [headercolor: #175e7a] {
 	verified_at timestamptz [ not null, default: `now()` ]
 }
 
-Table email_verification_request [headercolor: #175e7a] {
-	user_id uuid [ pk, not null ]
-	email varchar(320) [ not null ]
+Table registration_request [headercolor: #175e7a] {
+	email varchar(320) [ pk, not null, note: 'Нормализованный email; заявка не резервирует аккаунт' ]
+	password_hash varchar(255) [ not null ]
 	token_hash char(64) [ not null, unique ]
 	expires_at timestamptz [ not null ]
 	created_at timestamptz [ not null, default: `now()` ]
 
 	indexes {
-		(email) [ name: 'idx_email_verification_email' ]
-		(expires_at) [ name: 'idx_email_verification_expires_at' ]
+		(expires_at) [ name: 'registration_expires_at_idx' ]
 	}
 }
 
@@ -495,12 +495,9 @@ Ref user_account_status_changed_by {
 }
 
 Ref user_email_account {
-	user_email.user_id - user_account.id [ delete: no action, update: no action ]
+	user_email.(user_id, email) - user_account.(id, email) [ delete: no action, update: no action ]
 }
 
-Ref email_verification_request_account {
-	email_verification_request.user_id - user_account.id [ delete: no action, update: no action ]
-}
 
 Ref user_profile_user {
 	user_profile.user_id - user_account.id [ delete: no action, update: no action ]
