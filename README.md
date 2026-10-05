@@ -1,6 +1,6 @@
 # MatchLab Database
 
-Репозиторий содержит актуальную модель данных проекта MatchLab. Логин и email разделены: в `user_account` email не хранится, а подтверждённые адреса и запросы на подтверждение представлены отдельными сущностями. Письма отправляются синхронно и не сохраняются в модели данных.
+Репозиторий содержит актуальную модель данных проекта MatchLab. Email обязателен при регистрации и служит единственным идентификатором входа. В `user_account` хранится уникальный нормализованный email; `user_email` фиксирует его подтверждение, а независимая `registration_request` хранит email, хеш пароля и хеш одноразового токена до создания аккаунта. Регистрация сразу отправляет письмо; повтор заменяет пароль и токен заявки. Аккаунт создаётся только при подтверждении актуальной ссылки, поэтому чужая незавершённая заявка не занимает email. Существующие аккаунты регистрация не меняет. Письма отправляются синхронно и не сохраняются в модели данных.
 
 ## ER-диаграмма
 
@@ -8,7 +8,6 @@
 erDiagram
   user_account }o--|| user_account : references
   user_account ||--o| user_email : confirmed_email
-  user_account ||--o| email_verification_request : pending_email
   user_profile ||--|| user_account : references
   project }o--|| user_account : references
   project_position }o--|| project : references
@@ -40,7 +39,7 @@ erDiagram
   profile_credential }o--|| user_account : references
   user_account {
     uuid id PK
-    varchar(32) login UK
+    varchar(320) email UK
     varchar(255) password_hash
     system_role_code role
     user_account_status status
@@ -56,9 +55,9 @@ erDiagram
     varchar(320) email UK
     timestamptz verified_at
   }
-  email_verification_request {
-    uuid user_id PK, FK
-    varchar(320) email
+  registration_request {
+    varchar(320) email PK
+    varchar(255) password_hash
     char(64) token_hash UK
     timestamptz expires_at
     timestamptz created_at
