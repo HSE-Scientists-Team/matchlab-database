@@ -257,7 +257,39 @@ erDiagram
     timestamptz created_at
     timestamptz updated_at
   }
+  media_file ||--o| media_multipart_upload : upload_session
+  media_file {
+    uuid id PK
+    uuid owner_user_id
+    boolean is_public
+    varchar(63) bucket_name
+    text object_key
+    varchar(255) original_name
+    varchar(255) content_type
+    bigint size_bytes
+    bigint expected_size_bytes
+    text etag
+    char(64) checksum_sha256
+    file_status status
+    timestamptz created_at
+    timestamptz updated_at
+    timestamptz uploaded_at
+    timestamptz deleted_at
+  }
+  media_multipart_upload {
+    uuid file_id PK, FK
+    text s3_upload_id
+    bigint expected_size_bytes
+    bigint part_size_bytes
+    text status
+    jsonb completion_manifest
+    timestamptz created_at
+    timestamptz updated_at
+    timestamptz expires_at
+  }
 ```
+
+В диаграмме `media_file` и `media_multipart_upload` обозначают `media.file` и `media.multipart_upload`. Уникальна пара `(bucket_name, object_key)`, а не ключ отдельно. `owner_user_id` не имеет FK на User: идентификатор передаётся через проверенный сеанс Gateway.
 
 ## Содержимое
 

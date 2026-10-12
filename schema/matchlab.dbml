@@ -596,3 +596,54 @@ Ref review_author {
 Ref review_target_user {
 	review.target_user_id > user_account.id [ delete: no action, update: no action ]
 }
+
+// Реализовано миграциями backend 00002 и 00003.
+// owner_user_id — идентификатор User без межсервисного внешнего ключа.
+Enum media.file_status {
+  pending
+  ready
+  deleting [note: 'Внутреннее намерение удалить объект в S3 и зафиксировать результат в БД; не публичный API-статус']
+  deleted
+  failed
+}
+
+Table media.file [headercolor: #5969a6] {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  owner_user_id uuid [not null]
+  is_public boolean [not null, default: false]
+  bucket_name varchar(63) [not null]
+  object_key text [not null, note: 'Непустой ключ, не более 1024 байт']
+  original_name varchar(255) [not null]
+  content_type varchar(255) [not null]
+  size_bytes bigint [note: 'NULL до подтверждения; иначе >= 0']
+  expected_size_bytes bigint [note: 'NULL либо > 0']
+  etag text
+  checksum_sha256 char(64) [note: 'NULL либо 64 символа нижнего hexadecimal']
+  status media.file_status [not null, default: 'pending']
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+  uploaded_at timestamptz
+  deleted_at timestamptz
+  indexes {
+    (bucket_name, object_key) [unique, name: 'media_file_storage_location_unique']
+    (owner_user_id, created_at) [name: 'media_file_owner_created_idx', note: 'created_at DESC']
+    status [name: 'media_file_status_idx']
+    (updated_at, id) [name: 'media_file_pending_updated_idx', note: "WHERE status = 'pending'"]
+  }
+  Note: 'Bucket, original_name и content_type непустые. Контент хранится в S3; публичность регулирует Media, bucket приватен.'
+}
+
+Table media.multipart_upload [headercolor: #5969a6] {
+  file_id uuid [pk, not null, ref: > media.file.id]
+  s3_upload_id text [not null, note: 'Непустой S3 upload ID']
+  expected_size_bytes bigint [not null, note: '> 0; <= part_size_bytes * 10000']
+  part_size_bytes bigint [not null, note: 'От 5242880 до 5368709120']
+  status text [not null, default: 'uploading', note: 'uploading, completing, completed, aborted']
+  completion_manifest jsonb [not null, default: `'[]'::jsonb`, note: 'JSON-массив частей для повторного завершения']
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+  expires_at timestamptz [not null, note: '> created_at']
+  indexes {
+    expires_at [name: 'media_multipart_recovery_idx', note: "WHERE status IN ('uploading', 'completing')"]
+  }
+}
