@@ -74,7 +74,7 @@ enum portfolio_item_status {
 	rejected
 }
 
-Table user_account [headercolor: #175e7a] {
+Table users.user_account [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
 	email varchar(320) [ not null, note: 'Обязательный email для входа, нормализован в нижний регистр' ]
 	password_hash varchar(255) [ not null ]
@@ -94,13 +94,13 @@ Table user_account [headercolor: #175e7a] {
 	}
 }
 
-Table user_email [headercolor: #175e7a] {
+Table users.user_email [headercolor: #175e7a] {
 	user_id uuid [ pk, not null ]
 	email varchar(320) [ not null, unique ]
 	verified_at timestamptz [ not null, default: `now()` ]
 }
 
-Table registration_request [headercolor: #175e7a] {
+Table users.registration_request [headercolor: #175e7a] {
 	email varchar(320) [ pk, not null, note: 'Нормализованный email; заявка не резервирует аккаунт' ]
 	password_hash varchar(255) [ not null ]
 	token_hash char(64) [ not null, unique ]
@@ -112,7 +112,7 @@ Table registration_request [headercolor: #175e7a] {
 	}
 }
 
-Table trusted_email_domain [headercolor: #175e7a] {
+Table users.trusted_email_domain [headercolor: #175e7a] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
 	domain varchar(255) [ not null, unique ]
 	organization_name varchar(255) [ not null ]
@@ -121,72 +121,15 @@ Table trusted_email_domain [headercolor: #175e7a] {
 	updated_at timestamptz [ not null, default: `now()` ]
 }
 
-Table user_profile [headercolor: #317256] {
-	user_id uuid [ pk, not null ]
-	schema_version integer [ not null, default: 1 ]
-	data jsonb [ not null, default: '{}' ]
-	created_at timestamptz [ not null, default: `now()` ]
-	updated_at timestamptz [ not null, default: `now()` ]
-}
 
-Table user_privacy_settings {
-	user_id uuid [ pk, not null ]
-	show_participating_projects boolean [ not null, default: false ]
-	show_contacts boolean [ not null, default: false ]
-	updated_at timestamptz [ not null, default: `now()` ]
-}
 
-Table user_block {
-	blocker_user_id uuid [ not null ]
-	blocked_user_id uuid [ not null ]
-	created_at timestamptz [ not null, default: `now()` ]
 
-	indexes {
-		(blocker_user_id, blocked_user_id) [ pk, name: 'pk_user_block' ]
-		(blocked_user_id) [ name: 'idx_user_block_blocked' ]
-	}
-}
 
-Table profile_credential {
-	id uuid [ pk, not null, default: `gen_random_uuid()` ]
-	user_id uuid [ not null ]
-	title varchar(255) [ not null ]
-	institution varchar(255) [ not null ]
-	graduation_year integer
-	evidence_file_url text
-	status profile_credential_status [ not null, default: 'draft' ]
-	moderated_by_user_id uuid
-	moderated_at timestamptz
-	moderation_comment text
-	created_at timestamptz [ not null, default: `now()` ]
-	updated_at timestamptz [ not null, default: `now()` ]
 
-	indexes {
-		(user_id) [ name: 'idx_profile_credential_user' ]
-		(status) [ name: 'idx_profile_credential_status' ]
-	}
-}
 
-Table portfolio_item {
-	id uuid [ pk, not null, default: `gen_random_uuid()` ]
-	user_id uuid [ not null ]
-	type portfolio_work_type [ not null ]
-	title varchar(255) [ not null ]
-	description text [ not null ]
-	url text
-	evidence_file_url text
-	status portfolio_item_status [ not null, default: 'draft' ]
-	moderated_by_user_id uuid
-	moderated_at timestamptz
-	moderation_comment text
-	created_at timestamptz [ not null, default: `now()` ]
-	updated_at timestamptz [ not null, default: `now()` ]
 
-	indexes {
-		(user_id) [ name: 'idx_portfolio_item_user' ]
-		(status) [ name: 'idx_portfolio_item_status' ]
-	}
-}
+
+
 
 Table project [headercolor: #317256] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
@@ -250,25 +193,9 @@ Table project_position_skill {
 	}
 }
 
-Table profile_skill {
-	user_id uuid [ not null ]
-	skill varchar(100) [ not null ]
 
-	indexes {
-		(user_id, skill) [ pk, name: 'pk_profile_skill' ]
-		(skill) [ name: 'idx_profile_skill_skill' ]
-	}
-}
 
-Table profile_interest {
-	user_id uuid [ not null ]
-	interest varchar(100) [ not null ]
 
-	indexes {
-		(user_id, interest) [ pk, name: 'pk_profile_interest' ]
-		(interest) [ name: 'idx_profile_interest_interest' ]
-	}
-}
 
 Table project_member [headercolor: #b07a32] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
@@ -393,55 +320,24 @@ Table notification [headercolor: #5969a6] {
 	}
 }
 
-Table review [headercolor: #5969a6] {
-	id uuid [ pk, not null, default: `gen_random_uuid()` ]
-	project_id uuid [ not null ]
-	author_user_id uuid [ not null ]
-	target_type review_target_type [ not null ]
-	target_user_id uuid [ ]
-	rating integer [ not null ]
-	comment text
-	created_at timestamptz [ not null, default: `now()` ]
-	updated_at timestamptz [ not null, default: `now()` ]
 
-	indexes {
-		(project_id) [ name: 'idx_review_project' ]
-		(author_user_id) [ name: 'idx_review_author' ]
-		(target_user_id) [ name: 'idx_review_target_user' ]
-		(target_type, target_user_id) [ name: 'idx_review_target' ]
-	}
-}
 
-Ref user_privacy_settings_user {
-	user_privacy_settings.user_id - user_account.id [ delete: no action, update: no action ]
-}
 
-Ref user_block_blocker {
-	user_block.blocker_user_id > user_account.id [ delete: no action, update: no action ]
-}
 
-Ref user_block_blocked {
-	user_block.blocked_user_id > user_account.id [ delete: no action, update: no action ]
-}
 
-Ref profile_credential_user {
-	profile_credential.user_id > user_account.id [ delete: no action, update: no action ]
-}
 
-Ref profile_credential_moderator {
-	profile_credential.moderated_by_user_id > user_account.id [ delete: no action, update: no action ]
-}
 
-Ref portfolio_item_user {
-	portfolio_item.user_id > user_account.id [ delete: no action, update: no action ]
-}
 
-Ref portfolio_item_moderator {
-	portfolio_item.moderated_by_user_id > user_account.id [ delete: no action, update: no action ]
-}
+
+
+
+
+
+
+
 
 Ref chat_conversation_creator {
-	chat_conversation.created_by_user_id > user_account.id [ delete: no action, update: no action ]
+	chat_conversation.created_by_user_id > users.user_account.id [ delete: no action, update: no action ]
 }
 
 Ref chat_conversation_join_request {
@@ -453,7 +349,7 @@ Ref chat_participant_conversation {
 }
 
 Ref chat_participant_user {
-	chat_participant.user_id > user_account.id [ delete: no action, update: no action ]
+	chat_participant.user_id > users.user_account.id [ delete: no action, update: no action ]
 }
 
 Ref support_ticket_attachment_ticket {
@@ -465,17 +361,15 @@ Ref message_conversation {
 }
 
 Ref user_account_status_changed_by {
-	user_account.status_changed_by_user_id > user_account.id [ delete: no action, update: no action ]
+	users.user_account.status_changed_by_user_id > users.user_account.id [ delete: no action, update: no action ]
 }
 
 Ref user_email_account {
-	user_email.(user_id, email) - user_account.(id, email) [ delete: no action, update: no action ]
+	users.user_email.(user_id, email) - users.user_account.(id, email) [ delete: no action, update: no action ]
 }
 
 
-Ref user_profile_user {
-	user_profile.user_id - user_account.id [ delete: no action, update: no action ]
-}
+
 
 Ref project_tag_project {
 	project_tag.project_id > project.id [ delete: no action, update: no action ]
@@ -485,20 +379,16 @@ Ref project_position_skill_position {
 	project_position_skill.project_position_id > project_position.id [ delete: no action, update: no action ]
 }
 
-Ref profile_skill_user {
-	profile_skill.user_id > user_account.id [ delete: no action, update: no action ]
-}
 
-Ref profile_interest_user {
-	profile_interest.user_id > user_account.id [ delete: no action, update: no action ]
-}
+
+
 
 Ref project_owner {
-	project.owner_user_id > user_account.id [ delete: no action, update: no action ]
+	project.owner_user_id > users.user_account.id [ delete: no action, update: no action ]
 }
 
 Ref project_moderator {
-	project.moderated_by_user_id > user_account.id [ delete: no action, update: no action ]
+	project.moderated_by_user_id > users.user_account.id [ delete: no action, update: no action ]
 }
 
 Ref project_position_project {
@@ -510,7 +400,7 @@ Ref project_member_project {
 }
 
 Ref project_member_user {
-	project_member.user_id > user_account.id [ delete: no action, update: no action ]
+	project_member.user_id > users.user_account.id [ delete: no action, update: no action ]
 }
 
 Ref project_member_position {
@@ -522,38 +412,32 @@ Ref project_join_request_position {
 }
 
 Ref project_join_request_candidate {
-	project_join_request.candidate_user_id > user_account.id [ delete: no action, update: no action ]
+	project_join_request.candidate_user_id > users.user_account.id [ delete: no action, update: no action ]
 }
 
 Ref project_join_request_initiator {
-	project_join_request.initiated_by_user_id > user_account.id [ delete: no action, update: no action ]
+	project_join_request.initiated_by_user_id > users.user_account.id [ delete: no action, update: no action ]
 }
 
 Ref project_join_request_responder {
-	project_join_request.responded_by_user_id > user_account.id [ delete: no action, update: no action ]
+	project_join_request.responded_by_user_id > users.user_account.id [ delete: no action, update: no action ]
 }
 
 Ref message_sender {
-	message.sender_user_id > user_account.id [ delete: no action, update: no action ]
+	message.sender_user_id > users.user_account.id [ delete: no action, update: no action ]
 }
 
 
 
 Ref notification_user {
-	notification.user_id > user_account.id [ delete: no action, update: no action ]
+	notification.user_id > users.user_account.id [ delete: no action, update: no action ]
 }
 
-Ref review_project {
-	review.project_id > project.id [ delete: no action, update: no action ]
-}
 
-Ref review_author {
-	review.author_user_id > user_account.id [ delete: no action, update: no action ]
-}
 
-Ref review_target_user {
-	review.target_user_id > user_account.id [ delete: no action, update: no action ]
-}
+
+
+
 
 // Реализовано миграциями backend 00002 и 00003.
 // owner_user_id — идентификатор User без межсервисного внешнего ключа.
@@ -605,3 +489,84 @@ Table media.multipart_upload [headercolor: #5969a6] {
     expires_at [name: 'media_multipart_recovery_idx', note: "WHERE status IN ('uploading', 'completing')"]
   }
 }
+
+// KAN-38 — backend migration 00005. JSONB contains typed profile/achievement fields.
+Table users.user_profile {
+  user_id uuid [pk, not null, ref: > users.user_account.id]
+  data jsonb [not null, default: `'{}'::jsonb`, note: 'display_name, avatar_file_id, university, study_level, study_year, specialization, about, open_to_collaboration, project_types, interests, skills, contact_email, telegram']
+  show_contacts boolean [not null, default: false]
+  show_participating_projects boolean [not null, default: false]
+  updated_at timestamptz [not null, default: `now()`]
+  Note: 'Automatically initialized for each account. GIN indexes on data.skills and data.interests. Verified badge is computed from confirmed exact hse.ru/edu.hse.ru email.'
+}
+Table users.achievement {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  user_id uuid [not null, ref: > users.user_account.id]
+  kind text [not null, note: 'education/certificate/scientific/project']
+  data jsonb [not null, note: 'Typed title, description, institution, graduation_year and URL; owner edits reset verification']
+  evidence_file_id uuid [note: 'Media identifier without cross-service FK; proof must be private and ready']
+  status text [not null, default: 'unverified', note: 'unverified/pending_review/verified/needs_evidence']
+  revision integer [not null, default: 1, note: '> 0; optimistic concurrency']
+  moderation_comment text [not null, default: '']
+  submitted_at timestamptz
+  deleted_at timestamptz
+  created_at timestamptz [not null, default: `now()`]
+  updated_at timestamptz [not null, default: `now()`]
+  indexes {
+    (user_id, created_at, id) [name: 'achievement_owner']
+    (submitted_at, id) [name: 'achievement_queue', note: "WHERE status='pending_review'"]
+  }
+}
+Table users.achievement_decision {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  achievement_id uuid [not null, ref: > users.achievement.id]
+  revision integer [not null]
+  reviewer_user_id uuid [not null, ref: > users.user_account.id]
+  approved boolean [not null]
+  reviewed_data jsonb [not null, note: 'Snapshot of the reviewed revision']
+  evidence_file_id uuid
+  comment text [not null]
+  created_at timestamptz [not null, default: `now()`]
+  indexes { (achievement_id, revision) [unique] }
+}
+Table users.user_block {
+  blocker_user_id uuid [not null, ref: > users.user_account.id]
+  blocked_user_id uuid [not null, ref: > users.user_account.id]
+  created_at timestamptz [not null, default: `now()`]
+  indexes {
+    (blocker_user_id, blocked_user_id) [pk]
+    (blocked_user_id, blocker_user_id) [name: 'user_block_reverse']
+  }
+  Note: 'No self-blocks. Messages/invitations check either direction; memberships are preserved.'
+}
+Table users.project_context {
+  project_id uuid [pk, not null, note: 'Identifier owned by future Projects; no cross-service FK']
+  title varchar(255) [not null]
+  initiator_user_id uuid [not null, ref: > users.user_account.id]
+  completed_at timestamptz [note: 'NULL: current team; otherwise immutable completed snapshot for reviews']
+}
+Table users.project_context_member {
+  project_id uuid [not null, ref: > users.project_context.project_id]
+  user_id uuid [not null, ref: > users.user_account.id]
+  indexes {
+    (project_id, user_id) [pk]
+    (user_id, project_id) [name: 'project_context_user']
+  }
+}
+Table users.profile_review {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  project_id uuid [not null, ref: > users.project_context.project_id]
+  author_user_id uuid [not null, ref: > users.user_account.id]
+  target_user_id uuid [not null, ref: > users.user_account.id]
+  title varchar(255) [not null]
+  text text [not null]
+  rating integer [not null, note: '1–5']
+  created_at timestamptz [not null, default: `now()`]
+  indexes {
+    (project_id, author_user_id, target_user_id) [unique]
+    (target_user_id, created_at, id) [name: 'profile_review_target']
+  }
+  Note: 'Author and target must belong to completed project; no self-review.'
+}
+Ref: users.profile_review.(project_id,author_user_id) > users.project_context_member.(project_id,user_id)
+Ref: users.profile_review.(project_id,target_user_id) > users.project_context_member.(project_id,user_id)

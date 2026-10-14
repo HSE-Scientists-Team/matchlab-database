@@ -6,9 +6,15 @@
 
 ```mermaid
 erDiagram
+  user_account ||--|| user_profile : profile
+  user_account ||--o{ achievement : owns
+  achievement ||--o{ achievement_decision : decisions
+  user_account ||--o{ user_block : blocks
+  project_context ||--o{ project_context_member : members
+  project_context ||--o{ profile_review : reviews
+  user_account ||--o{ profile_review : receives
   user_account }o--|| user_account : references
   user_account ||--o| user_email : confirmed_email
-  user_profile ||--|| user_account : references
   project }o--|| user_account : references
   project_position }o--|| project : references
   project_member }o--|| project : references
@@ -18,11 +24,6 @@ erDiagram
   project_join_request }o--|| user_account : references
   message }o--|| user_account : references
   notification }o--|| user_account : references
-  review }o--|| project : references
-  review }o--|| user_account : references
-  user_privacy_settings ||--|| user_account : references
-  user_block }o--|| user_account : references
-  portfolio_item }o--|| user_account : references
   chat_conversation }o--|| user_account : references
   chat_conversation ||--|| project_join_request : references
   chat_participant }o--|| chat_conversation : references
@@ -31,9 +32,6 @@ erDiagram
   message }o--|| chat_conversation : references
   project_tag }o--|| project : references
   project_position_skill }o--|| project_position : references
-  profile_skill }o--|| user_account : references
-  profile_interest }o--|| user_account : references
-  profile_credential }o--|| user_account : references
   user_account {
     uuid id PK
     varchar(320) email UK
@@ -67,7 +65,6 @@ erDiagram
     timestamptz created_at
     timestamptz updated_at
   }
-  user_profile {
     uuid user_id PK
     integer schema_version
     jsonb data
@@ -158,7 +155,6 @@ erDiagram
     timestamptz created_at
     timestamptz read_at
   }
-  review {
     uuid id PK
     uuid project_id
     uuid author_user_id
@@ -169,18 +165,15 @@ erDiagram
     timestamptz created_at
     timestamptz updated_at
   }
-  user_privacy_settings {
     uuid user_id PK
     boolean show_participating_projects
     boolean show_contacts
     timestamptz updated_at
   }
-  user_block {
     uuid blocker_user_id
     uuid blocked_user_id
     timestamptz created_at
   }
-  portfolio_item {
     uuid id PK
     uuid user_id
     portfolio_work_type type
@@ -222,15 +215,12 @@ erDiagram
     uuid project_position_id
     varchar(100) skill
   }
-  profile_skill {
     uuid user_id
     varchar(100) skill
   }
-  profile_interest {
     uuid user_id
     varchar(100) interest
   }
-  profile_credential {
     uuid id PK
     uuid user_id
     varchar(255) title
@@ -292,3 +282,6 @@ erDiagram
 2) синхронизируем Mermaid-схему в этом readme
 3) обновляем `DATA_MODEL.md`
 4) пушим изменения в мастер
+
+
+Профили KAN-38 соответствуют миграции 00005 backend: достижения, аудит, блокировки, приватность, контексты проектов и отзывы. Подробнее — [DATA_MODEL.md](DATA_MODEL.md).
