@@ -16,8 +16,6 @@ erDiagram
   project_member }o--|| project_position : references
   project_join_request }o--|| project_position : references
   project_join_request }o--|| user_account : references
-  support_ticket }o--|| user_account : references
-  support_ticket }o--|| project : references
   message }o--|| user_account : references
   notification }o--|| user_account : references
   review }o--|| project : references
@@ -27,7 +25,6 @@ erDiagram
   portfolio_item }o--|| user_account : references
   chat_conversation }o--|| user_account : references
   chat_conversation ||--|| project_join_request : references
-  chat_conversation ||--|| support_ticket : references
   chat_participant }o--|| chat_conversation : references
   chat_participant }o--|| user_account : references
   support_ticket_attachment }o--|| support_ticket : references
@@ -134,20 +131,14 @@ erDiagram
     uuid id PK
     uuid author_user_id
     uuid assigned_user_id
-    support_ticket_type type
     support_ticket_status status
-    support_ticket_source source
     varchar(255) subject
     text description
     uuid target_user_id
     uuid target_project_id
-    text resolution
-    integer feedback_rating
-    text feedback_comment
     timestamptz created_at
     timestamptz updated_at
     timestamptz resolved_at
-    timestamptz closed_at
   }
   message {
     uuid id PK
@@ -208,7 +199,6 @@ erDiagram
     uuid id PK
     uuid created_by_user_id
     uuid join_request_id UK
-    uuid support_ticket_id UK
     timestamptz created_at
     timestamptz updated_at
   }
@@ -222,10 +212,7 @@ erDiagram
   support_ticket_attachment {
     uuid id PK
     uuid support_ticket_id
-    text file_url
-    varchar(255) file_name
-    varchar(100) content_type
-    timestamptz created_at
+    uuid file_id
   }
   project_tag {
     uuid project_id
@@ -289,7 +276,7 @@ erDiagram
   }
 ```
 
-В диаграмме `media_file` и `media_multipart_upload` обозначают `media.file` и `media.multipart_upload`. Уникальна пара `(bucket_name, object_key)`, а не ключ отдельно. `owner_user_id` не имеет FK на User: идентификатор передаётся через проверенный сеанс Gateway.
+В диаграмме `media_file` и `media_multipart_upload` обозначают `media.file` и `media.multipart_upload`, а `support_ticket` и `support_ticket_attachment` — таблицы схемы `support`. Для Media уникальна пара `(bucket_name, object_key)`, а не ключ отдельно. `owner_user_id` не имеет FK на User: идентификатор передаётся через проверенный сеанс Gateway. В Support поля пользователей, проекта и файла также являются межсервисными идентификаторами без FK; внешний ключ есть только от вложения к тикету.
 
 ## Содержимое
 
