@@ -7,25 +7,12 @@
 ```mermaid
 erDiagram
   public_chat_conversation }o--|| users_user_account : chat_conversation_creator
-  public_chat_conversation |o--o| public_project_join_request : chat_conversation_join_request
   public_chat_participant }o--|| public_chat_conversation : chat_participant_conversation
   public_chat_participant }o--|| users_user_account : chat_participant_user
   support_support_ticket_attachment }o--|| support_support_ticket : support_ticket_attachment_ticket
   public_message }o--|| public_chat_conversation : message_conversation
   users_user_account }o--o| users_user_account : user_account_status_changed_by
   users_user_email |o--|| users_user_account : user_email_account
-  public_project_tag }o--|| public_project : project_tag_project
-  public_project_position_skill }o--|| public_project_position : project_position_skill_position
-  public_project }o--|| users_user_account : project_owner
-  public_project }o--o| users_user_account : project_moderator
-  public_project_position }o--|| public_project : project_position_project
-  public_project_member }o--|| public_project : project_member_project
-  public_project_member }o--|| users_user_account : project_member_user
-  public_project_member }o--o| public_project_position : project_member_position
-  public_project_join_request }o--|| public_project_position : project_join_request_position
-  public_project_join_request }o--|| users_user_account : project_join_request_candidate
-  public_project_join_request }o--|| users_user_account : project_join_request_initiator
-  public_project_join_request }o--o| users_user_account : project_join_request_responder
   public_message }o--|| users_user_account : message_sender
   public_notification }o--|| users_user_account : notification_user
   media_multipart_upload |o--|| media_file : file_id
@@ -43,71 +30,17 @@ erDiagram
   users_profile_review }o--|| users_user_account : target_user_id
   users_profile_review }o--|| users_project_context_member : project_id_author_user_id
   users_profile_review }o--|| users_project_context_member : project_id_target_user_id
-  public_project {
-    uuid id PK
-    uuid owner_user_id FK
-    varchar(255) title
-    text summary
-    project_type type
-    varchar(120) field
-    jsonb data
-    project_status status
-    date planned_start_date
-    date planned_end_date
-    timestamptz started_at
-    timestamptz completed_at
-    timestamptz published_at
-    uuid moderated_by_user_id FK
-    timestamptz moderated_at
-    text moderation_comment
-    timestamptz created_at
-    timestamptz updated_at
-  }
-  public_project_position {
-    uuid id PK
-    uuid project_id FK
-    varchar(255) title
-    text description
-    integer slots_count
-    boolean is_open
-    jsonb data
-    timestamptz created_at
-    timestamptz updated_at
-  }
-  public_project_tag {
-    uuid project_id PK, FK
-    varchar(100) tag PK
-  }
-  public_project_position_skill {
-    uuid project_position_id PK, FK
-    varchar(100) skill PK
-  }
-  public_project_member {
-    uuid id PK
-    uuid project_id FK
-    uuid user_id FK
-    uuid project_position_id FK
-    project_member_status status
-    timestamptz joined_at
-    timestamptz left_at
-  }
-  public_project_join_request {
-    uuid id PK
-    uuid project_position_id FK
-    uuid candidate_user_id FK
-    join_request_type type
-    join_request_status status
-    uuid initiated_by_user_id FK
-    text message
-    uuid responded_by_user_id FK
-    timestamptz responded_at
-    timestamptz created_at
-    timestamptz updated_at
-  }
+  projects_role }o--|| projects_project : project_id
+  projects_member }o--|| projects_project : project_id
+  projects_member }o--o| projects_role : project_id_role_id
+  projects_join_request }o--|| projects_project : project_id
+  projects_join_request }o--|| projects_role : project_id_role_id
+  projects_moderation }o--|| projects_project : project_id
+  projects_context_outbox }o--|| projects_project : project_id
   public_chat_conversation {
     uuid id PK
     uuid created_by_user_id FK
-    uuid join_request_id FK, UK
+    uuid join_request_id UK
     timestamptz created_at
     timestamptz updated_at
   }
@@ -254,6 +187,8 @@ erDiagram
     timestamptz created_at
   }
   users_project_context {
+    bigint source_revision
+    text state
     uuid project_id PK
     varchar(255) title
     uuid initiator_user_id FK
@@ -272,6 +207,57 @@ erDiagram
     text text
     integer rating
     timestamptz created_at
+  }
+  projects_project {
+    uuid id PK
+    uuid owner_user_id
+    jsonb data
+    text status
+    boolean moderation_hidden
+    integer revision
+    timestamptz created_at
+    timestamptz completed_at
+    timestamptz updated_at
+  }
+  projects_role {
+    uuid id PK
+    uuid project_id FK
+    varchar(255) title
+    text description
+    jsonb skills
+    timestamptz deleted_at
+    integer slots
+  }
+  projects_member {
+    uuid project_id PK, FK
+    uuid user_id PK
+    uuid role_id FK
+    text status
+  }
+  projects_join_request {
+    uuid id PK
+    uuid project_id FK
+    uuid role_id FK
+    uuid candidate_user_id
+    text type
+    text status
+    text message
+    timestamptz created_at
+  }
+  projects_moderation {
+    bigint id PK
+    uuid project_id FK
+    uuid actor_user_id
+    boolean hidden
+    text reason
+    timestamptz created_at
+  }
+  projects_context_outbox {
+    uuid project_id PK, FK
+    integer revision PK
+    jsonb payload
+    timestamptz created_at
+    timestamptz delivered_at
   }
 ```
 
@@ -299,3 +285,5 @@ erDiagram
 Mermaid-блок не редактируется вручную. Зависимости и их версии закреплены в package-lock.json.
 
 Профили KAN-38 соответствуют миграции 00005 backend: достижения, аудит, блокировки, приватность, контексты проектов и отзывы. Подробнее — [DATA_MODEL.md](DATA_MODEL.md).
+
+Проекты KAN-39 принадлежат схеме `projects`; User хранит только версионированную проекцию команды для контактов и отзывов. Search/Recommendation используют API владельцев и не имеют бизнес-таблиц.
