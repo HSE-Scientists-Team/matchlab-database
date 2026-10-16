@@ -131,106 +131,21 @@ Table users.trusted_email_domain [headercolor: #175e7a] {
 
 
 
-Table project [headercolor: #317256] {
-	id uuid [ pk, not null, default: `gen_random_uuid()` ]
-	owner_user_id uuid [ not null ]
-	title varchar(255) [ not null ]
-	summary text
-	type project_type [ not null ]
-	field varchar(120) [ not null ]
-	data jsonb [ not null, default: '{}' ]
-	status project_status [ not null, default: 'draft' ]
-	planned_start_date date
-	planned_end_date date [ ]
-	started_at timestamptz
-	completed_at timestamptz
-	published_at timestamptz
-	moderated_by_user_id uuid
-	moderated_at timestamptz
-	moderation_comment text
-	created_at timestamptz [ not null, default: `now()` ]
-	updated_at timestamptz [ not null, default: `now()` ]
-
-	indexes {
-		(owner_user_id) [ name: 'idx_project_owner' ]
-		(status) [ name: 'idx_project_status' ]
-	}
-}
-
-Table project_position [headercolor: #317256] {
-	id uuid [ pk, not null, default: `gen_random_uuid()` ]
-	project_id uuid [ not null ]
-	title varchar(255) [ not null ]
-	description text
-	slots_count integer [ not null, default: 1 ]
-	is_open boolean [ not null, default: true ]
-	data jsonb [ not null, default: '{}' ]
-	created_at timestamptz [ not null, default: `now()` ]
-	updated_at timestamptz [ not null, default: `now()` ]
-
-	indexes {
-		(project_id) [ name: 'idx_project_position_project' ]
-	}
-}
-
-Table project_tag {
-	project_id uuid [ not null ]
-	tag varchar(100) [ not null ]
-
-	indexes {
-		(project_id, tag) [ pk, name: 'pk_project_tag' ]
-		(tag) [ name: 'idx_project_tag_tag' ]
-	}
-}
-
-Table project_position_skill {
-	project_position_id uuid [ not null ]
-	skill varchar(100) [ not null ]
-
-	indexes {
-		(project_position_id, skill) [ pk, name: 'pk_project_position_skill' ]
-		(skill) [ name: 'idx_project_position_skill_skill' ]
-	}
-}
 
 
 
 
 
-Table project_member [headercolor: #b07a32] {
-	id uuid [ pk, not null, default: `gen_random_uuid()` ]
-	project_id uuid [ not null ]
-	user_id uuid [ not null ]
-	project_position_id uuid
-	status project_member_status [ not null, default: 'active' ]
-	joined_at timestamptz [ not null, default: `now()` ]
-	left_at timestamptz
 
-	indexes {
-		(project_id, user_id) [ name: 'uq_project_member_project_user', unique ]
-		(user_id) [ name: 'idx_project_member_user' ]
-		(project_position_id) [ name: 'idx_project_member_position' ]
-	}
-}
 
-Table project_join_request [headercolor: #b07a32] {
-	id uuid [ pk, not null, default: `gen_random_uuid()` ]
-	project_position_id uuid [ not null ]
-	candidate_user_id uuid [ not null ]
-	type join_request_type [ not null ]
-	status join_request_status [ not null, default: 'pending' ]
-	initiated_by_user_id uuid [ not null ]
-	message text
-	responded_by_user_id uuid
-	responded_at timestamptz
-	created_at timestamptz [ not null, default: `now()` ]
-	updated_at timestamptz [ not null, default: `now()` ]
 
-	indexes {
-		(project_position_id, candidate_user_id) [ unique, name: 'uq_join_request_position_candidate' ]
-		(candidate_user_id) [ name: 'idx_join_request_candidate' ]
-	}
-}
+
+
+
+
+
+
+
 
 Table support.support_ticket [headercolor: #b56b45] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
@@ -340,9 +255,7 @@ Ref chat_conversation_creator {
 	chat_conversation.created_by_user_id > users.user_account.id [ delete: no action, update: no action ]
 }
 
-Ref chat_conversation_join_request {
-	chat_conversation.join_request_id - project_join_request.id [ delete: no action, update: no action ]
-}
+
 
 Ref chat_participant_conversation {
 	chat_participant.conversation_id > chat_conversation.id [ delete: no action, update: no action ]
@@ -371,57 +284,33 @@ Ref user_email_account {
 
 
 
-Ref project_tag_project {
-	project_tag.project_id > project.id [ delete: no action, update: no action ]
-}
-
-Ref project_position_skill_position {
-	project_position_skill.project_position_id > project_position.id [ delete: no action, update: no action ]
-}
 
 
 
 
 
-Ref project_owner {
-	project.owner_user_id > users.user_account.id [ delete: no action, update: no action ]
-}
 
-Ref project_moderator {
-	project.moderated_by_user_id > users.user_account.id [ delete: no action, update: no action ]
-}
 
-Ref project_position_project {
-	project_position.project_id > project.id [ delete: no action, update: no action ]
-}
 
-Ref project_member_project {
-	project_member.project_id > project.id [ delete: no action, update: no action ]
-}
 
-Ref project_member_user {
-	project_member.user_id > users.user_account.id [ delete: no action, update: no action ]
-}
 
-Ref project_member_position {
-	project_member.project_position_id > project_position.id [ delete: no action, update: no action ]
-}
 
-Ref project_join_request_position {
-	project_join_request.project_position_id > project_position.id [ delete: no action, update: no action ]
-}
 
-Ref project_join_request_candidate {
-	project_join_request.candidate_user_id > users.user_account.id [ delete: no action, update: no action ]
-}
 
-Ref project_join_request_initiator {
-	project_join_request.initiated_by_user_id > users.user_account.id [ delete: no action, update: no action ]
-}
 
-Ref project_join_request_responder {
-	project_join_request.responded_by_user_id > users.user_account.id [ delete: no action, update: no action ]
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Ref message_sender {
 	message.sender_user_id > users.user_account.id [ delete: no action, update: no action ]
@@ -540,10 +429,12 @@ Table users.user_block {
   Note: 'No self-blocks. Messages/invitations check either direction; memberships are preserved.'
 }
 Table users.project_context {
+  source_revision bigint [not null, default: 0]
+  state text [not null, default: 'active', note: 'active/completed/cancelled; ignores stale source_revision']
   project_id uuid [pk, not null, note: 'Identifier owned by future Projects; no cross-service FK']
   title varchar(255) [not null]
   initiator_user_id uuid [not null, ref: > users.user_account.id]
-  completed_at timestamptz [note: 'NULL: current team; otherwise immutable completed snapshot for reviews']
+  completed_at timestamptz [note: 'NULL: not completed; contacts require state=active; completed snapshot is immutable']
 }
 Table users.project_context_member {
   project_id uuid [not null, ref: > users.project_context.project_id]
@@ -570,3 +461,75 @@ Table users.profile_review {
 }
 Ref: users.profile_review.(project_id,author_user_id) > users.project_context_member.(project_id,user_id)
 Ref: users.profile_review.(project_id,target_user_id) > users.project_context_member.(project_id,user_id)
+
+// KAN-39 — authoritative Project data. User identifiers have no cross-service FK.
+Table projects.project {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  owner_user_id uuid [not null]
+  data jsonb [not null, note: 'title, type scientific/practical, field, problem, goal, tags, planned_start, planned_end']
+  status text [not null, default: 'recruiting', note: 'recruiting/unpublished/active/completed/cancelled']
+  moderation_hidden boolean [not null, default: false]
+  revision integer [not null, default: 1, note: '> 0; all mutations lock the project row']
+  created_at timestamptz [not null, default: `now()`]
+  completed_at timestamptz
+  updated_at timestamptz [not null, default: `now()`]
+  indexes {
+    (owner_user_id,created_at,id) [name: 'project_owner']
+    (status,created_at,id) [name: 'project_catalog', note: 'WHERE NOT moderation_hidden']
+  }
+}
+Table projects.role {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  project_id uuid [not null, ref: > projects.project.id]
+  title varchar(255) [not null]
+  description text [not null]
+  skills jsonb [not null]
+  deleted_at timestamptz
+  slots integer [not null, note: '1–100; cannot be less than occupied count']
+  indexes { (project_id,id) [unique] }
+}
+Table projects.member {
+  project_id uuid [not null, ref: > projects.project.id]
+  user_id uuid [not null]
+  role_id uuid [note: 'NULL for initiator']
+  status text [not null, default: 'active', note: 'active/left/removed']
+  indexes {
+    (project_id,user_id) [pk]
+    (user_id,project_id) [name: 'project_member_user']
+  }
+}
+Ref: projects.member.(project_id,role_id) > projects.role.(project_id,id)
+Table projects.join_request {
+  id uuid [pk, not null, default: `gen_random_uuid()`]
+  project_id uuid [not null, ref: > projects.project.id]
+  role_id uuid [not null]
+  candidate_user_id uuid [not null]
+  type text [not null, note: 'application/invitation']
+  status text [not null, default: 'pending', note: 'pending/accepted/rejected/cancelled']
+  message text [not null]
+  created_at timestamptz [not null, default: `now()`]
+  indexes {
+    (project_id,role_id,candidate_user_id) [unique, name: 'project_join_pending', note: "WHERE status='pending'"]
+    (candidate_user_id,created_at,id) [name: 'project_join_candidate']
+  }
+}
+Ref: projects.join_request.(project_id,role_id) > projects.role.(project_id,id)
+Table projects.moderation {
+  id bigint [pk, not null, increment]
+  project_id uuid [not null, ref: > projects.project.id]
+  actor_user_id uuid [not null]
+  hidden boolean [not null]
+  reason text [not null]
+  created_at timestamptz [not null, default: `now()`]
+}
+Table projects.context_outbox {
+  project_id uuid [not null, ref: > projects.project.id]
+  revision integer [not null]
+  payload jsonb [not null, note: 'Versioned User ProjectContext, no credentials']
+  created_at timestamptz [not null, default: `now()`]
+  delivered_at timestamptz
+  indexes {
+    (project_id,revision) [pk]
+    (created_at,project_id,revision) [name: 'project_outbox_pending', note: 'WHERE delivered_at IS NULL']
+  }
+}
