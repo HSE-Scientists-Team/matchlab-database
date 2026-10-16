@@ -1,0 +1,14 @@
+{
+  "name": "matchlab-database",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node scripts/schema.mjs",
+    "check": "node scripts/schema.mjs --check && node scripts/check-mermaid.mjs"
+  },
+  "devDependencies": {
+    "@dbml/core": "10.3.1",
+    "jsdom": "26.1.0",
+    "mermaid": "11.17.2"
+  }
+}
