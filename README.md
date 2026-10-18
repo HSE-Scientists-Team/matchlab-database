@@ -8,14 +8,10 @@
 
 ```mermaid
 erDiagram
-  public_chat_conversation }o--|| users_user_account : chat_conversation_creator
-  public_chat_participant }o--|| public_chat_conversation : chat_participant_conversation
-  public_chat_participant }o--|| users_user_account : chat_participant_user
+  chat_message }o--|| chat_conversation : chat_message_conversation
   support_support_ticket_attachment }o--|| support_support_ticket : support_ticket_attachment_ticket
-  public_message }o--|| public_chat_conversation : message_conversation
   users_user_account }o--o| users_user_account : user_account_status_changed_by
   users_user_email |o--|| users_user_account : user_email_account
-  public_message }o--|| users_user_account : message_sender
   public_notification }o--|| users_user_account : notification_user
   media_multipart_upload |o--|| media_file : file_id
   users_user_profile |o--|| users_user_account : user_id
@@ -43,30 +39,6 @@ erDiagram
   admin_session }o--|| admin_account : admin_id
   admin_audit_event }o--o| admin_account : actor_admin_id
   support_ticket_event }o--|| support_support_ticket : ticket_id
-  public_chat_conversation {
-    uuid id PK
-    uuid created_by_user_id FK
-    uuid join_request_id UK
-    timestamptz created_at
-    timestamptz updated_at
-  }
-  public_chat_participant {
-    uuid conversation_id PK, FK
-    uuid user_id PK, FK
-    timestamptz joined_at
-    timestamptz last_read_at
-    timestamptz archived_at
-  }
-  public_message {
-    uuid id PK
-    uuid conversation_id FK
-    uuid sender_user_id FK
-    text body
-    jsonb attachments
-    timestamptz created_at
-    timestamptz edited_at
-    timestamptz deleted_at
-  }
   public_notification {
     uuid id PK
     uuid user_id FK
@@ -245,6 +217,25 @@ erDiagram
     integer revision
     timestamptz created_at
   }
+  chat_conversation {
+    uuid id PK
+    uuid user_low_id
+    uuid user_high_id
+    bigint last_message_seq
+    bigint user_low_last_read_seq
+    bigint user_high_last_read_seq
+    timestamptz created_at
+    timestamptz last_message_at
+  }
+  chat_message {
+    uuid id PK
+    uuid conversation_id FK
+    bigint seq
+    uuid sender_user_id
+    uuid client_message_id
+    text body
+    timestamptz created_at
+  }
   projects_project {
     uuid id PK
     uuid owner_user_id
@@ -335,7 +326,7 @@ erDiagram
   }
 ```
 
-Диаграмма генерируется из DBML командой `npm run generate`. Имена сущностей имеют префикс схемы: `users_user_profile` — это `users.user_profile`, `public_project` — `public.project`, `media_file` — `media.file`, `support_support_ticket` — `support.support_ticket`. Составные ключи и связи описаны точно в DBML; значок UK у атрибута означает уникальность одного поля, а не участие в составном уникальном индексе.
+Диаграмма генерируется из DBML командой `npm run generate`. Имена сущностей имеют префикс схемы: `users_user_profile` — это `users.user_profile`, `chat_conversation` — `chat.conversation`, `media_file` — `media.file`, `support_support_ticket` — `support.support_ticket`. Составные ключи и связи описаны точно в DBML; значок UK у атрибута означает уникальность одного поля, а не участие в составном уникальном индексе.
 
 Для Media уникальна пара `(bucket_name, object_key)`, а не ключ отдельно. `owner_user_id` не имеет FK на User: идентификатор передаётся через проверенный сеанс Gateway. В Support поля пользователей, проекта и файла также являются межсервисными идентификаторами без FK; внешний ключ есть только от вложения к тикету.
 
@@ -361,3 +352,9 @@ Mermaid-блок не редактируется вручную. Зависим�
 Профили KAN-38 соответствуют миграции 00005 backend: достижения, аудит, блокировки, приватность, контексты проектов и отзывы. Подробнее — [DATA_MODEL.md](DATA_MODEL.md).
 
 Проекты KAN-39 принадлежат схеме `projects`; User хранит только версионированную проекцию команды для контактов и отзывов. Search/Recommendation используют API владельцев и не имеют бизнес-таблиц.
+
+Личные чаты KAN-37 соответствуют миграции backend `00008`: `chat.conversation` и
+`chat.message`. Только обычный текст, без вложений, редактирования и удаления.
+Уникальная пара пользователей, последовательные номера, отметки прочтения и ID отправки
+вместо прежних трёх таблиц в public. Межсервисных FK к User нет; внутренний FK связывает
+сообщение с диалогом. Ограничения и транзакционные правила — в [DATA_MODEL.md](DATA_MODEL.md).
