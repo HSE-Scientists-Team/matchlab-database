@@ -80,6 +80,8 @@ Table users.user_account [headercolor: #175e7a] {
 	password_hash varchar(255) [ not null ]
 	role system_role_code [ not null, default: 'client' ]
 	status user_account_status [ not null, default: 'active' ]
+	revision integer [not null, default: 1]
+	status_changed_by_admin_id uuid [note: 'Staff identity from Admin; no cross-service FK']
 	status_changed_by_user_id uuid
 	status_changed_at timestamptz
 	status_comment text
@@ -117,6 +119,7 @@ Table users.trusted_email_domain [headercolor: #175e7a] {
 	domain varchar(255) [ not null, unique ]
 	organization_name varchar(255) [ not null ]
 	is_active boolean [ not null, default: true ]
+	revision integer [not null, default: 1]
 	created_at timestamptz [ not null, default: `now()` ]
 	updated_at timestamptz [ not null, default: `now()` ]
 }
@@ -150,7 +153,10 @@ Table users.trusted_email_domain [headercolor: #175e7a] {
 Table support.support_ticket [headercolor: #b56b45] {
 	id uuid [ pk, not null, default: `gen_random_uuid()` ]
 	author_user_id uuid [ not null, note: 'Идентификатор пользователя из User; межсервисного FK нет' ]
-	assigned_user_id uuid [ note: 'Идентификатор сотрудника из User; межсервисного FK нет' ]
+	assigned_user_id uuid [ note: 'Legacy User identity; new assignments use assigned_admin_id' ]
+	assigned_admin_id uuid [note: 'Staff identity from Admin; no cross-service FK']
+	revision integer [not null, default: 1]
+	resolution_comment text [not null, default: '']
 	status support.support_ticket_status [ not null, default: 'open' ]
 	subject varchar(255) [ not null, note: 'Непустая строка после btrim' ]
 	description text [ not null, note: 'Непустая строка после btrim' ]
@@ -163,6 +169,7 @@ Table support.support_ticket [headercolor: #b56b45] {
 	indexes {
 		(author_user_id) [ name: 'idx_support_ticket_author' ]
 		(assigned_user_id) [ name: 'idx_support_ticket_assignee' ]
+		(status,assigned_admin_id,created_at,id) [name: 'support_admin_queue']
 		(status) [ name: 'idx_support_ticket_status' ]
 		(target_user_id) [ name: 'idx_support_ticket_target_user' ]
 		(target_project_id) [ name: 'idx_support_ticket_target_project' ]
@@ -410,7 +417,8 @@ Table users.achievement_decision {
   id uuid [pk, not null, default: `gen_random_uuid()`]
   achievement_id uuid [not null, ref: > users.achievement.id]
   revision integer [not null]
-  reviewer_user_id uuid [not null, ref: > users.user_account.id]
+  reviewer_user_id uuid [ref: > users.user_account.id, note: 'Legacy reviewer; exactly one of reviewer_user_id/reviewer_admin_id']
+  reviewer_admin_id uuid [note: 'Admin identity; no cross-service FK']
   approved boolean [not null]
   reviewed_data jsonb [not null, note: 'Snapshot of the reviewed revision']
   evidence_file_id uuid
@@ -517,7 +525,8 @@ Ref: projects.join_request.(project_id,role_id) > projects.role.(project_id,id)
 Table projects.moderation {
   id bigint [pk, not null, increment]
   project_id uuid [not null, ref: > projects.project.id]
-  actor_user_id uuid [not null]
+  actor_user_id uuid [note: 'Legacy actor; exactly one of actor_user_id/actor_admin_id']
+  actor_admin_id uuid [note: 'Admin identity; no cross-service FK']
   hidden boolean [not null]
   reason text [not null]
   created_at timestamptz [not null, default: `now()`]
@@ -532,4 +541,77 @@ Table projects.context_outbox {
     (project_id,revision) [pk]
     (created_at,project_id,revision) [name: 'project_outbox_pending', note: 'WHERE delivered_at IS NULL']
   }
+}
+
+
+Table admin.account {
+ id uuid [pk, not null, default: `gen_random_uuid()`]
+ email varchar(320) [not null, unique, note: 'Normalized lowercase staff login; independent of users.user_account']
+ display_name varchar(120) [not null]
+ password_hash varchar(255) [not null]
+ role text [not null, note: 'moderator/administrator; no public registration']
+ active boolean [not null, default: true]
+ revision integer [not null, default: 1]
+ session_version integer [not null, default: 1, note: 'Increments on password, role or active-state changes; invalidates sessions']
+ created_by_admin_id uuid [ref: > admin.account.id]
+ last_login_at timestamptz
+ created_at timestamptz [not null, default: `now()`]
+ updated_at timestamptz [not null, default: `now()`]
+ Note: 'The last active administrator cannot be disabled/demoted; mutations serialize through an advisory transaction lock.'
+}
+Table admin.session {
+ token_hash char(64) [pk, not null, note: 'SHA-256; plaintext bearer tokens are never stored']
+ admin_id uuid [not null, ref: > admin.account.id]
+ session_version integer [not null]
+ expires_at timestamptz [not null, note: 'Eight-hour TTL checked on every request']
+ created_at timestamptz [not null, default: `now()`]
+ indexes {
+  (expires_at) [name: 'admin_session_expiration']
+  (admin_id) [name: 'admin_session_account']
+ }
+}
+Table admin.login_throttle {
+ key_hash char(64) [pk, not null, note: 'SHA-256 of normalized login email']
+ failures integer [not null, default: 0]
+ window_started_at timestamptz [not null, default: `now()`, note: 'Five failures per fifteen-minute window; stale buckets are cleaned']
+}
+Table admin.audit_event {
+ id uuid [pk, not null, default: `gen_random_uuid()`]
+ actor_admin_id uuid [ref: > admin.account.id]
+ action text [not null]
+ resource_id text [not null, default: '']
+ comment text [not null, default: '']
+ result text [not null, note: 'started/succeeded/failed/unknown; no credentials or full request payloads']
+ created_at timestamptz [not null, default: `now()`]
+ completed_at timestamptz
+ indexes {
+  (created_at,id) [name: 'admin_audit_created']
+  (actor_admin_id,created_at,id) [name: 'admin_audit_actor']
+ }
+}
+Table users.admin_event {
+ id uuid [pk, not null, default: `gen_random_uuid()`]
+ actor_admin_id uuid [not null, note: 'Admin identity; no cross-service FK']
+ action text [not null, note: 'user.status/domain.save']
+ resource_id uuid [not null, note: 'User account or trusted email domain; tagged by action']
+ comment text [not null]
+ previous_status text [not null, default: '']
+ status text [not null, default: '']
+ revision integer [not null]
+ created_at timestamptz [not null, default: `now()`]
+ indexes { (resource_id,created_at,id) [name: 'user_admin_resource'] }
+}
+Table support.ticket_event {
+ id uuid [pk, not null, default: `gen_random_uuid()`]
+ ticket_id uuid [not null, ref: > support.support_ticket.id]
+ actor_admin_id uuid [not null, note: 'Admin identity; no cross-service FK']
+ action text [not null, note: 'assign/unassign/resolve/decline/reopen/note']
+ comment text [not null]
+ previous_status text [not null]
+ status text [not null]
+ revision integer [not null]
+ previous_assigned_admin_id uuid
+ assigned_admin_id uuid
+ created_at timestamptz [not null, default: `now()`]
+ indexes { (ticket_id,created_at,id) [name: 'ticket_history'] }
 }

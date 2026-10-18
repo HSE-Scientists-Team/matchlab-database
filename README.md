@@ -2,6 +2,8 @@
 
 Репозиторий содержит актуальную модель данных проекта MatchLab. Email обязателен при регистрации и служит единственным идентификатором входа. В `user_account` хранится уникальный нормализованный email; `user_email` фиксирует его подтверждение, а независимая `registration_request` хранит email, хеш пароля и хеш одноразового токена до создания аккаунта. Регистрация сразу отправляет письмо; повтор заменяет пароль и токен заявки. Аккаунт создаётся только при подтверждении актуальной ссылки, поэтому чужая незавершённая заявка не занимает email. Существующие аккаунты регистрация не меняет. Письма отправляются синхронно и не сохраняются в модели данных.
 
+Служебные аккаунты администраторов и модераторов изолированы в схеме `admin`; их сеансы, пароли и регистрация не связаны с публичными профилями. Операции над жалобами, достижениями, доменами и проектами выполняют сервисы — владельцы данных с атомарной историей решений.
+
 ## ER-диаграмма
 
 ```mermaid
@@ -19,7 +21,7 @@ erDiagram
   users_user_profile |o--|| users_user_account : user_id
   users_achievement }o--|| users_user_account : user_id
   users_achievement_decision }o--|| users_achievement : achievement_id
-  users_achievement_decision }o--|| users_user_account : reviewer_user_id
+  users_achievement_decision }o--o| users_user_account : reviewer_user_id
   users_user_block }o--|| users_user_account : blocker_user_id
   users_user_block }o--|| users_user_account : blocked_user_id
   users_project_context }o--|| users_user_account : initiator_user_id
@@ -37,6 +39,10 @@ erDiagram
   projects_join_request }o--|| projects_role : project_id_role_id
   projects_moderation }o--|| projects_project : project_id
   projects_context_outbox }o--|| projects_project : project_id
+  admin_account }o--o| admin_account : created_by_admin_id
+  admin_session }o--|| admin_account : admin_id
+  admin_audit_event }o--o| admin_account : actor_admin_id
+  support_ticket_event }o--|| support_support_ticket : ticket_id
   public_chat_conversation {
     uuid id PK
     uuid created_by_user_id FK
@@ -73,6 +79,9 @@ erDiagram
     uuid id PK
     uuid author_user_id
     uuid assigned_user_id
+    uuid assigned_admin_id
+    integer revision
+    text resolution_comment
     support_ticket_status status
     varchar(255) subject
     text description
@@ -86,6 +95,19 @@ erDiagram
     uuid id PK
     uuid support_ticket_id FK
     uuid file_id
+  }
+  support_ticket_event {
+    uuid id PK
+    uuid ticket_id FK
+    uuid actor_admin_id
+    text action
+    text comment
+    text previous_status
+    text status
+    integer revision
+    uuid previous_assigned_admin_id
+    uuid assigned_admin_id
+    timestamptz created_at
   }
   media_file {
     uuid id PK
@@ -122,6 +144,8 @@ erDiagram
     varchar(255) password_hash
     system_role_code role
     user_account_status status
+    integer revision
+    uuid status_changed_by_admin_id
     uuid status_changed_by_user_id FK
     timestamptz status_changed_at
     text status_comment
@@ -146,6 +170,7 @@ erDiagram
     varchar(255) domain UK
     varchar(255) organization_name
     boolean is_active
+    integer revision
     timestamptz created_at
     timestamptz updated_at
   }
@@ -175,6 +200,7 @@ erDiagram
     uuid achievement_id FK
     integer revision
     uuid reviewer_user_id FK
+    uuid reviewer_admin_id
     boolean approved
     jsonb reviewed_data
     uuid evidence_file_id
@@ -206,6 +232,17 @@ erDiagram
     varchar(255) title
     text text
     integer rating
+    timestamptz created_at
+  }
+  users_admin_event {
+    uuid id PK
+    uuid actor_admin_id
+    text action
+    uuid resource_id
+    text comment
+    text previous_status
+    text status
+    integer revision
     timestamptz created_at
   }
   projects_project {
@@ -248,6 +285,7 @@ erDiagram
     bigint id PK
     uuid project_id FK
     uuid actor_user_id
+    uuid actor_admin_id
     boolean hidden
     text reason
     timestamptz created_at
@@ -258,6 +296,42 @@ erDiagram
     jsonb payload
     timestamptz created_at
     timestamptz delivered_at
+  }
+  admin_account {
+    uuid id PK
+    varchar(320) email UK
+    varchar(120) display_name
+    varchar(255) password_hash
+    text role
+    boolean active
+    integer revision
+    integer session_version
+    uuid created_by_admin_id FK
+    timestamptz last_login_at
+    timestamptz created_at
+    timestamptz updated_at
+  }
+  admin_session {
+    char(64) token_hash PK
+    uuid admin_id FK
+    integer session_version
+    timestamptz expires_at
+    timestamptz created_at
+  }
+  admin_login_throttle {
+    char(64) key_hash PK
+    integer failures
+    timestamptz window_started_at
+  }
+  admin_audit_event {
+    uuid id PK
+    uuid actor_admin_id FK
+    text action
+    text resource_id
+    text comment
+    text result
+    timestamptz created_at
+    timestamptz completed_at
   }
 ```
 
